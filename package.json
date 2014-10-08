@@ -1,0 +1,25 @@
+{
+  "name": "brunch-react-boilerplate",
+  "version": "0.0.0",
+  "description": "A boilerplate for React with Brunch",
+  "main": "app.js",
+  "scripts": {
+    "install": "bower install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": false,
+  "authors": [
+    "Chi-chi Wang <chichi.wang@ignitioncreative.com>"
+  ],
+  "dependencies": {
+    "brunch": "^1.7.14",
+    "traceur-brunch": "^1.7.3",
+    "auto-reload-brunch": "^1.7.3",
+    "cjsx-brunch": "*",
+    "css-brunch": "^1.7.0",
+    "stylus-brunch": "^1.8.1",
+    "javascript-brunch": "^1.7.1",
+    "uglify-js-brunch": "^1.7.7"
+  },
+  "devDependencies": {}
+}
