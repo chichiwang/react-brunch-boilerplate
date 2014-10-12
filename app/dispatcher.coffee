@@ -1,8 +1,7 @@
 'use strict'
 
-ns = require 'util/namespace'
 DispatcherClass = require 'flux/dispatcher/class'
+dispatcherSingleton = dispatcherSingleton or new DispatcherClass()
+dispatcherSingleton._id_ = 'DISPATCHER'
 
-ns.dispatcher = ns.dispatcher or new DispatcherClass()
-ns.dispatcher._id_ = 'DISPATCHER'
-module.exports = ns.dispatcher
+module.exports = dispatcherSingleton
