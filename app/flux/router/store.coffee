@@ -2,12 +2,9 @@
 
 SET = "SET_STORE:ROUTER:STATE"
 REPLACE = "REPLACE_STORE:ROUTER:STATE"
-ns = require 'util/namespace'
 StoresClass = require 'flux/stores/class'
 
-ns.store = ns.store or {}
-ns.store.router = ns.store.router or {}
-ns.store.router.state = ns.store.router.state or new StoresClass
+routerStore = routerStore or new StoresClass
 	SET: SET
 	REPLACE: REPLACE
 	defaultValue:
@@ -18,4 +15,4 @@ ns.store.router.state = ns.store.router.state or new StoresClass
 		transition: undefined
 		transitioned: true
 
-module.exports = ns.store.router.state
+module.exports = routerStore
