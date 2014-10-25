@@ -55,23 +55,21 @@ if typeof Helpers.clone isnt 'function'
 		return result
 
 # Static Private Methods
-# Be Sure to call these methods with fn.call(this) or fn.apply(this, arguments)
+# Be Sure to call these methods with fn.call(this, arg1, arg2, ...) or fn.apply(this, arguments)
+_init: ->
+		_validate options
+		# TODO:
+		# Step through actions if actions and register them
+		@Dispatcher.register (args...) ->
+			_dispatcherHandler.apply(@, args)
+
 _validate = (options) ->
-	# options =
-	# 	actions:
-	# 		"action1": "function1"
-	# 		"action2": "function2"
-	# 	callbacks:
-	# 		"function1": Fn()
-	# 		"function2": Fn()
-	# 	emitter: Emitter Instance
-	# 	dispatcher: Dispatcher Instance
 	if typeof options isnt 'object'
 		throw new Error "StoreClass _validate: options passed to constructor must be an object!"
 	if typeof emitter isnt 'object'
-		throw new Error "StoreClass _validate: constructor must be passed an emitter!"
+		throw new Error "StoreClass _validate: constructor must be passed an emitter instance!"
 	if typeof dispatcher isnt 'object'
-		throw new Error "StoreClass _validate: constructor must be passed a dispatcher!"
+		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
 
 _emitChange = (ev, val) ->
 	# TODO:
@@ -102,17 +100,25 @@ module.exports = StoreClass = class StoreClass
 	Dispatcher: undefined
 
 	constructor: (options = {}) ->
-		_validate(options);
-		# TODO:
-		# Store options
-		# Bind Events
+		# options =
+		# 	actions:
+		# 		"action1": "function1"
+		# 		"action2": "function2"
+		# 	callbacks:
+		# 		"function1": Fn()
+		# 		"function2": Fn()
+		# 	emitter: Emitter Instance
+		# 	dispatcher: Dispatcher Instance
+		_init.call @, options
 
-	_init: ->
+	registerActions: (actionsObj) ->
 		# TODO:
-		# ...
-		@Dispatcher.register (args...) ->
-			_dispatcherHandler.apply(@, args)
-
+		# Validate actionsObj
+		# Merge with internal actions list
+	registerAction: (actionName, callbackName) ->
+		# TODO:
+		# Add to internal actions list
+		# Delegate callback existence handler to dispatch handler
 	registerCallbacks: (callbacks) ->
 		# callbacks = object
 		# key = name, val = fn
@@ -122,6 +128,7 @@ module.exports = StoreClass = class StoreClass
 	registerCallback: (name, callback) ->
 		# TODO:
 		# Push an object { name: name, fn: callback } into @callbacks arrays
+		# Replace any existing callbacks with the same name
 
 	get: (key) ->
 		# TODO:
