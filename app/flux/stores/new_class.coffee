@@ -58,6 +58,8 @@ if typeof Helpers.isArray isnt 'function'
 		return true if Object::toString.call(obj) is '[object Array]'
 		return false
 
+
+
 # Static Private Methods
 # Be Sure to call these methods with fn.call(this, arg1, arg2, ...) or fn.apply(this, arguments)
 _init = (options)->
@@ -88,7 +90,9 @@ _dispatcherHandler = (args) ->
 	# TODO:
 	# ...
 
-# TODO: METHOD DIFF OBJECTS
+# TODO: METHOD GET CHANGES TO OBJ (DIFF 2 OBJS)
+
+
 
 # StoreClass
 # TODO:
