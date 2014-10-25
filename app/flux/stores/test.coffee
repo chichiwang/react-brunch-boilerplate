@@ -6,3 +6,5 @@ StoreInstance = new StoreClass
 	actions:
 		action1: "callback1"
 		action2: ["callback2", "callback3"]
+
+console.log StoreInstance.registerAction('action2', "callback2").actions

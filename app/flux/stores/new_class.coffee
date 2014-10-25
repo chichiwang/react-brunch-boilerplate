@@ -147,14 +147,14 @@ module.exports = StoreClass = class StoreClass
 		@actions = {} unless @actions
 		@actions[actionName] = [] unless @actions[actionName]
 		
-		if (typeof callbackName is 'string') # Allow callbackName to be an array of strings
-			@actions[actionName].push callbackName
+		if (typeof callbackName is 'string')
+			@actions[actionName].push callbackName if !(callbackName in @actions[actionName])
 		else if Helpers.isArray callbackName
 			for name in callbackName
 				if typeof name isnt 'string'
 					err = 'StoreClass registerAction: every element of callback array assigned to ' + actionName + ' must be a string!'
 					throw new Error err
-			@actions[actionName] = @actions[actionName].concat(callbackName)
+				@actions[actionName].push(name) if !(name in @actions[actionName])
 		else
 			err = 'StoreClass registerAction: callback name assigned to ' + actionName + ' must be a string or array of strings!'
 			throw new Error err
