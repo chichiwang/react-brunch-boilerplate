@@ -46,7 +46,7 @@ module.exports = Helpers =
 			return result
 		# Date Object
 		if obj instanceof Date
-			return new Date(obj,getTime())
+			return new Date(obj.getTime())
 		# RegExp Object
 		if obj instanceof RegExp
 			flags = ''

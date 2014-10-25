@@ -33,7 +33,7 @@ if typeof Helpers.clone isnt 'function'
 			return result
 		# Date Object
 		if obj instanceof Date
-			return new Date(obj,getTime())
+			return new Date(obj.getTime())
 		# RegExp Object
 		if obj instanceof RegExp
 			flags = ''
