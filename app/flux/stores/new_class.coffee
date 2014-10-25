@@ -92,7 +92,7 @@ _dispatcherHandler = (args) ->
 #  .. Create a global list of groups that all store instances can access
 #  .. Group will allow you to listen into an entire group of stores for changes
 
-StoreClass = class StoreClass
+module.exports = StoreClass = class StoreClass
 	_value: undefined
 	_callbacks: undefined # list of callbacks
 
