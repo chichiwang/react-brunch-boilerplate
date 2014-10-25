@@ -42,7 +42,7 @@ module.exports = Helpers =
 		if Object::toString.call(obj) is '[object Array]'
 			result = obj.slice()
 			for el, idx in result
-				result[idx] = deepCopy(el, _copied)
+				result[idx] = @clone el, _copied
 			return result
 		# Date Object
 		if obj instanceof Date
