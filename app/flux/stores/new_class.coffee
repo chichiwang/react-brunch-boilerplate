@@ -37,7 +37,7 @@ if typeof Helpers.clone isnt 'function'
 		# RegExp Object
 		if obj instanceof RegExp
 			flags = ''
-			flages += 'g' if obj.global?
+			flags += 'g' if obj.global?
 			flags += 'i' if obj.ignoreCase?
 			flags += 'm' if obj.multiline?
 			flags += 'y' if obj.sticky?
