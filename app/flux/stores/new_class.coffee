@@ -112,13 +112,23 @@ module.exports = StoreClass = class StoreClass
 		_init.call @, options
 
 	registerActions: (actionsObj) ->
-		# TODO:
 		# Validate actionsObj
+		if typeof actionsObj isnt 'object'
+			throw new Error 'StoreClass registerActions: parameter passed in must be an object!'
 		# Merge with internal actions list
+		for key, val in actionsObj
+			if not actionsObj.hasOwnProperty? key
+				continue
+			@registerAction key, val
 	registerAction: (actionName, callbackName) ->
-		# TODO:
+		# Validate callbackName
+		if typeof callbackName isnt 'string'
+			err = 'StoreClass registerAction: callback name assigned to ' + actionName + ' must be a string!'
+			throw new Error err
 		# Add to internal actions list
-		# Delegate callback existence handler to dispatch handler
+		@actions = {} unless @actions
+		@actions[actionName] = [] unless @actions[actionName]
+		@actions[actionName].push callbackName
 	registerCallbacks: (callbacks) ->
 		# callbacks = object
 		# key = name, val = fn
