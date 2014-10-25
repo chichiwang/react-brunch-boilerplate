@@ -87,6 +87,11 @@ _dispatcherHandler = (args) ->
 # StoreClass
 # TODO:
 # Add a history of up to 5 previous values of _value
+# Add the ability to add a store to a group
+#  .. Create the group if the group does not already exist
+#  .. Create a global list of groups that all store instances can access
+#  .. Group will allow you to listen into an entire group of stores for changes
+
 StoreClass = class StoreClass
 	_value: undefined
 	_callbacks: undefined # list of callbacks
