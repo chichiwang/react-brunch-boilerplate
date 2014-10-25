@@ -56,19 +56,21 @@ if typeof Helpers.clone isnt 'function'
 
 # Static Private Methods
 # Be Sure to call these methods with fn.call(this, arg1, arg2, ...) or fn.apply(this, arguments)
-_init: ->
+_init = (options)->
+		# console.log '_init', options
 		_validate options
 		# TODO:
 		# Step through actions if actions and register them
+		@Dispatcher = options.dispatcher
 		@Dispatcher.register (args...) ->
 			_dispatcherHandler.apply(@, args)
 
 _validate = (options) ->
 	if typeof options isnt 'object'
 		throw new Error "StoreClass _validate: options passed to constructor must be an object!"
-	if typeof emitter isnt 'object'
+	if typeof options.emitter isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed an emitter instance!"
-	if typeof dispatcher isnt 'object'
+	if typeof options.dispatcher isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
 
 _emitChange = (ev, val) ->
@@ -117,10 +119,11 @@ module.exports = StoreClass = class StoreClass
 		if typeof actionsObj isnt 'object'
 			throw new Error 'StoreClass registerActions: parameter passed in must be an object!'
 		# Merge with internal actions list
-		for key, val in actionsObj
-			if not actionsObj.hasOwnProperty? key
+		for key, val of actionsObj
+			if actionsObj.hasOwnProperty? and not actionsObj.hasOwnProperty key
 				continue
 			@registerAction key, val
+		console.log 'StoreClass registerActions: ', @actions
 	registerAction: (actionName, callbackName) ->
 		# Validate callbackName
 		if typeof callbackName isnt 'string'
@@ -130,6 +133,7 @@ module.exports = StoreClass = class StoreClass
 		@actions = {} unless @actions
 		@actions[actionName] = [] unless @actions[actionName]
 		@actions[actionName].push callbackName
+		console.log 'StoreClass registerAction: ', @actions
 	registerCallbacks: (callbacksObj) ->
 		# callbacksObj
 		# key = name, val = fn
