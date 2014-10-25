@@ -6,4 +6,4 @@ StoreInstance = new StoreClass
 
 StoreInstance.registerActions
 	action1: "callback1"
-	action2: "callback2"
+	action2: ["callback2", "callback3"]

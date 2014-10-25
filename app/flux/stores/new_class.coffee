@@ -82,7 +82,7 @@ _emitChange = (ev, val) ->
 	# Fire emitter with event and value
 
 _dispatcherHandler = (args) ->
-	console.log '_dispatcherHandler', args
+	console.log 'StoreClass _dispatcherHandler: ', args
 	# TODO:
 	# ...
 
@@ -128,18 +128,24 @@ module.exports = StoreClass = class StoreClass
 				continue
 			@registerAction key, val
 		console.log 'StoreClass registerActions: ', @actions
+		@
 	registerAction: (actionName, callbackName) ->
+		# console.log 'StoreClass registerAction: ', actionName, callbackName
 		@actions = {} unless @actions
 		@actions[actionName] = [] unless @actions[actionName]
-		# Validate callbackName
+		
 		if (typeof callbackName is 'string') # Allow callbackName to be an array of strings
-			# ...
+			@actions[actionName].push callbackName
+		else if Helpers.isArray callbackName
+			for name in callbackName
+				if typeof name isnt 'string'
+					err = 'StoreClass registerAction: every element of callback array assigned to ' + actionName + ' must be a string!'
+					throw new Error err
+			@actions[actionName] = @actions[actionName].concat(callbackName)
 		else
-			err = 'StoreClass registerAction: callback name assigned to ' + actionName + ' must be a string!'
+			err = 'StoreClass registerAction: callback name assigned to ' + actionName + ' must be a string or array of strings!'
 			throw new Error err
-		# Add to internal actions list
-		@actions[actionName].push callbackName
-		console.log 'StoreClass registerAction: ', @actions
+		@
 	registerCallbacks: (callbacksObj) ->
 		# callbacksObj
 		# key = name, val = fn
