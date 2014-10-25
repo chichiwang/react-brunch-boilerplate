@@ -125,13 +125,20 @@ module.exports = StoreClass = class StoreClass
 
 	# Registeration Methods
 	registerActions: (actionsObj) ->
-		# Validate actionsObj
+		# Validate actionsObj is an object
 		if typeof actionsObj isnt 'object'
 			throw new Error 'StoreClass registerActions: parameter passed in must be an object!'
 		# Merge with internal actions list
 		for key, val of actionsObj
 			if actionsObj.hasOwnProperty? and not actionsObj.hasOwnProperty key
 				continue
+			# Validate actionObj key/value pairs
+			if (typeof val isnt 'string') and (not Helpers.isArray(val))
+				throw new Error 'StoreClass registerActions: property ' + key + ' must contain a string or array of strings!'
+			else if (Helpers.isArray(val))
+				for element in val
+					if typeof element isnt 'string'
+						throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
 			@registerAction key, val
 		# console.log 'StoreClass registerActions: ', @actions
 		@
