@@ -65,6 +65,8 @@ _init = (options)->
 		_validate options
 		# TODO:
 		# Step through actions if actions and register them
+		@registerActions(options.actions) if options.actions
+
 		@Dispatcher = options.dispatcher
 		@Dispatcher.register (args...) ->
 			_dispatcherHandler.apply(@, args)
@@ -127,7 +129,7 @@ module.exports = StoreClass = class StoreClass
 			if actionsObj.hasOwnProperty? and not actionsObj.hasOwnProperty key
 				continue
 			@registerAction key, val
-		console.log 'StoreClass registerActions: ', @actions
+		# console.log 'StoreClass registerActions: ', @actions
 		@
 	registerAction: (actionName, callbackName) ->
 		# console.log 'StoreClass registerAction: ', actionName, callbackName
