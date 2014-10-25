@@ -70,6 +70,7 @@ _init = (options)->
 		@registerActions(options.actions) if options.actions
 		@registerCallbacks(options.callbacks) if options.callbacks
 
+		@Emitter = options.emitter
 		@Dispatcher = options.dispatcher
 		@Dispatcher.register (args...) ->
 			_dispatcherHandler.apply(@, args)
@@ -82,6 +83,9 @@ _validate = (options) ->
 	if typeof options.dispatcher isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
 
+_emitChanges = ->
+	# TODO:
+	# Emit all changes to internal value
 _emitChange = (ev, val) ->
 	# TODO:
 	# Fire emitter with event and value
@@ -89,7 +93,10 @@ _emitChange = (ev, val) ->
 _dispatcherHandler = (args) ->
 	console.log 'StoreClass _dispatcherHandler: ', args
 	# TODO:
-	# ...
+	# check against internal _actions and _callbacks to find correct callback
+	# Invoke associated callbacks, passing the this context
+	# If callback returns true, check for changes and emit
+	# If callback returns false, don't
 
 # TODO: METHOD GET CHANGES TO OBJ (DIFF 2 OBJS)
 
