@@ -68,6 +68,7 @@ _init = (options)->
 		# TODO:
 		# Step through actions if actions and register them
 		@registerActions(options.actions) if options.actions
+		@registerCallbacks(options.callbacks) if options.callbacks
 
 		@Dispatcher = options.dispatcher
 		@Dispatcher.register (args...) ->
@@ -104,9 +105,8 @@ _dispatcherHandler = (args) ->
 
 module.exports = StoreClass = class StoreClass
 	_value: undefined
+	_actions: undefined # object map of actions to methods
 	_callbacks: undefined # list of callbacks
-
-	actions: undefined # object map of actions to methods
 
 	Emitter: undefined
 	Dispatcher: undefined
@@ -140,38 +140,49 @@ module.exports = StoreClass = class StoreClass
 					if typeof element isnt 'string'
 						throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
 			@registerAction key, val
-		# console.log 'StoreClass registerActions: ', @actions
+		# console.log 'StoreClass registerActions: ', @_actions
 		@
 	registerAction: (actionName, callbackName) ->
 		# console.log 'StoreClass registerAction: ', actionName, callbackName
-		# Init actions property
-		@actions = {} unless @actions
-		@actions[actionName] = [] unless @actions[actionName]
+		# Init _actions property
+		@_actions = {} unless @_actions
+		@_actions[actionName] = [] unless @_actions[actionName]
 		# Assign callback string
 		if (typeof callbackName is 'string')
-			@actions[actionName].push callbackName if !(callbackName in @actions[actionName])
+			@_actions[actionName].push callbackName if !(callbackName in @_actions[actionName])
 		# Assign callback array
 		else if Helpers.isArray callbackName
 			for name in callbackName
 				if typeof name isnt 'string'
 					err = 'StoreClass registerAction: every element of callback array assigned to ' + actionName + ' must be a string!'
 					throw new Error err
-				@actions[actionName].push(name) if !(name in @actions[actionName])
+				@_actions[actionName].push(name) if !(name in @_actions[actionName])
 		# Error: not a string or array
 		else
 			err = 'StoreClass registerAction: callback name assigned to ' + actionName + ' must be a string or array of strings!'
 			throw new Error err
 		@
 	registerCallbacks: (callbacksObj) ->
-		# callbacksObj
-		# key = name, val = fn
-		# TODO:
-		# For key in callback
-		# @registerCallback(key, callback[key])
-	registerCallback: (name, callback) ->
-		# TODO:
-		# Push an object { name: name, fn: callback } into @callbacks arrays
-		# Replace any existing callbacks with the same name
+		# Validate callbacksObj is an object
+		if typeof callbacksObj isnt 'object'
+			throw new Error 'StoreClass registerCallbacks: parameter passed in must be an object!'
+		# Merge with internal callbacks list
+		for key, val of callbacksObj
+			if callbacksObj.hasOwnProperty? and not callbacksObj.hasOwnProperty key
+				continue
+			if typeof val isnt 'function'
+				throw new Error 'StoreClass registerCallbacks: property ' + key + ' of parameter must be a function!'
+			@registerCallback key, val
+		# console.log 'StoreClass registerCallbacks: ', @_callbacks
+		@
+	registerCallback: (callbackName, callbackFn) ->
+		@_callbacks = {} unless @_callbacks
+		if typeof callbackName isnt 'string'
+			throw new Error 'StoreClass registerCallback: callbackName passed to this method must be a string!'
+		if typeof callbackFn isnt 'function'
+			throw new Error 'StoreClass registerCallback: callbackFn passed to this method must be a function!'
+		@_callbacks[callbackName] = callbackFn
+		@
 
 	# Unregister Methods
 	unregisterActions: (actionsObj) ->
