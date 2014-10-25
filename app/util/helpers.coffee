@@ -11,8 +11,7 @@ module.exports = Helpers =
 		if (obj is null) or (typeof obj is 'undefined')
 			return true
 
-		if typeof obj is 'boolean'
-			return !obj
+		return false if typeof obj is 'boolean'
 
 		return false if obj.length > 0
 		return true if obj.length is 0
