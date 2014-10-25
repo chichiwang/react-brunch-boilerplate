@@ -22,6 +22,9 @@ module.exports = Helpers =
 			for key in obj
 				return false if hasOwnProperty.call(obj, key)
 		true
+	isArray: (obj) ->
+		return true if Object::toString.call(obj) is '[object Array]'
+		return false
 	# A mix of solutions from:
 	# http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object/13333781#13333781
 	# http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning

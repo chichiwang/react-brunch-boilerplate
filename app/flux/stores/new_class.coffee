@@ -53,6 +53,10 @@ if typeof Helpers.clone isnt 'function'
 		for key, val of obj
 			result[key] = @clone val, _copied
 		return result
+if typeof Helpers.isArray isnt 'function'
+	Helpers.isArray = (obj) ->
+		return true if Object::toString.call(obj) is '[object Array]'
+		return false
 
 # Static Private Methods
 # Be Sure to call these methods with fn.call(this, arg1, arg2, ...) or fn.apply(this, arguments)
@@ -125,13 +129,15 @@ module.exports = StoreClass = class StoreClass
 			@registerAction key, val
 		console.log 'StoreClass registerActions: ', @actions
 	registerAction: (actionName, callbackName) ->
+		@actions = {} unless @actions
+		@actions[actionName] = [] unless @actions[actionName]
 		# Validate callbackName
-		if typeof callbackName isnt 'string'
+		if (typeof callbackName is 'string') # Allow callbackName to be an array of strings
+			# ...
+		else
 			err = 'StoreClass registerAction: callback name assigned to ' + actionName + ' must be a string!'
 			throw new Error err
 		# Add to internal actions list
-		@actions = {} unless @actions
-		@actions[actionName] = [] unless @actions[actionName]
 		@actions[actionName].push callbackName
 		console.log 'StoreClass registerAction: ', @actions
 	registerCallbacks: (callbacksObj) ->
