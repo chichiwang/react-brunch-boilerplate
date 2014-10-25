@@ -111,16 +111,17 @@ module.exports = StoreClass = class StoreClass
 	Emitter: undefined
 	Dispatcher: undefined
 
+	# Class Constructor
+	# options =
+	# 	actions:
+	# 		"action1": "function1"
+	# 		"action2": "function2"
+	# 	callbacks:
+	# 		"function1": Fn()
+	# 		"function2": Fn()
+	# 	emitter: Emitter Instance
+	# 	dispatcher: Dispatcher Instance
 	constructor: (options = {}) ->
-		# options =
-		# 	actions:
-		# 		"action1": "function1"
-		# 		"action2": "function2"
-		# 	callbacks:
-		# 		"function1": Fn()
-		# 		"function2": Fn()
-		# 	emitter: Emitter Instance
-		# 	dispatcher: Dispatcher Instance
 		_init.call @, options
 
 	# Registeration Methods
