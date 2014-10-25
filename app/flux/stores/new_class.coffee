@@ -111,6 +111,7 @@ module.exports = StoreClass = class StoreClass
 		# 	dispatcher: Dispatcher Instance
 		_init.call @, options
 
+	# Registeration Methods
 	registerActions: (actionsObj) ->
 		# Validate actionsObj
 		if typeof actionsObj isnt 'object'
@@ -129,8 +130,8 @@ module.exports = StoreClass = class StoreClass
 		@actions = {} unless @actions
 		@actions[actionName] = [] unless @actions[actionName]
 		@actions[actionName].push callbackName
-	registerCallbacks: (callbacks) ->
-		# callbacks = object
+	registerCallbacks: (callbacksObj) ->
+		# callbacksObj
 		# key = name, val = fn
 		# TODO:
 		# For key in callback
@@ -140,6 +141,21 @@ module.exports = StoreClass = class StoreClass
 		# Push an object { name: name, fn: callback } into @callbacks arrays
 		# Replace any existing callbacks with the same name
 
+	# Unregister Methods
+	unregisterActions: (actionsObj) ->
+		# TODO:
+		# ...
+	unregisterAction: (actionName, callbackName) ->
+		# TODO:
+		# If no callbackName, unregister all callbacks
+	unregisterCallbacks: (callbacksObj) ->
+		# TODO:
+		# ...
+	unregisterCallback: (name, callback) ->
+		# TODO:
+		# ...
+
+	# Get Value, Bind and Unbind Change Methods
 	get: (key) ->
 		# TODO:
 		# Retrieve value if no key
