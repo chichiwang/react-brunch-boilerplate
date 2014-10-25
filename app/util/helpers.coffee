@@ -39,7 +39,7 @@ module.exports = Helpers =
 		# Native/Custom Clone Methods
 		return obj.clone(true) if typeof obj.clone is 'function'
 		# Array Object
-		if Obj::toString.call(obj) is '[object Array]'
+		if Object::toString.call(obj) is '[object Array]'
 			result = obj.slice()
 			for el, idx in result
 				result[idx] = deepCopy(el, _copied)
@@ -62,7 +62,7 @@ module.exports = Helpers =
 		# Recurse
 		proto = if Object.getPrototypeOf? then Object.getPrototypeOf(obj) else obj.__proto__
 		proto = obj.constructor.prototype unless proto
-		result = objectCreate prototype
+		result = objectCreate proto
 		for key, val of obj
 			result[key] = @clone val, _copied
 		return result
