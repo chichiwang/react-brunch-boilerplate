@@ -1,63 +1,18 @@
 'use strict'
 
 # Helper Utility Methods
-try Helpers = require 'util/helpers'
+try isArray = require('util/helpers').isArray
 catch
-	Helpers = {}
-# Helper Utility Fallbacks
-if typeof Helpers.clone isnt 'function'
-	objectCreate = Object.create
-	if typeof objectCreate isnt 'function'
-		objectCreate = (o)->
-			F = ->
-			F.prototype = o
-			return new F()
-	Helpers.clone = (obj, _copied) ->
-		# Null or Undefined
-		if not obj? or typeof obj isnt 'object'
-			return obj
-
-		# Init _copied list (used internally)
-		if typeof _copied is 'undefined'
-			_copied = []
-		else return obj if obj in _copied
-		_copied.push obj
-
-		# Native/Custom Clone Methods
-		return obj.clone(true) if typeof obj.clone is 'function'
-		# Array Object
-		if Object::toString.call(obj) is '[object Array]'
-			result = obj.slice()
-			for el, idx in result
-				result[idx] = @clone el, _copied
-			return result
-		# Date Object
-		if obj instanceof Date
-			return new Date(obj.getTime())
-		# RegExp Object
-		if obj instanceof RegExp
-			flags = ''
-			flags += 'g' if obj.global?
-			flags += 'i' if obj.ignoreCase?
-			flags += 'm' if obj.multiline?
-			flags += 'y' if obj.sticky?
-			return new RegExp(obj.source, flags)
-		# DOM Element
-		if obj.nodeType? and typeof obj.cloneNode is 'function'
-			return obj.cloneNode(true)
-
-		# Recurse
-		proto = if Object.getPrototypeOf? then Object.getPrototypeOf(obj) else obj.__proto__
-		proto = obj.constructor.prototype unless proto
-		result = objectCreate proto
-		for key, val of obj
-			result[key] = @clone val, _copied
-		return result
-if typeof Helpers.isArray isnt 'function'
-	Helpers.isArray = (obj) ->
+	isArray = (obj) ->
 		return true if Object::toString.call(obj) is '[object Array]'
 		return false
 
+# TODO:
+# Store-specific (immutable) clone class
+# Args: obj # Object to clone
+# If obj is an object, set all properties to writable: false
+# If array, copy all elements to new array - if object recurse
+# If any other type of value return it
 
 
 # Static Private Methods
@@ -111,7 +66,8 @@ _dispatcherHandler = (args) ->
 #  .. Group will allow you to listen into an entire group of stores for changes
 
 module.exports = StoreClass = class StoreClass
-	_value: undefined
+	_value: undefined # mutable internal value
+	value: undefined # store-clone of _value which is set to be immutable
 	_actions: undefined # object map of actions to methods
 	_callbacks: undefined # list of callbacks
 

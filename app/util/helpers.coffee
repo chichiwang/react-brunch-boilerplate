@@ -42,7 +42,7 @@ module.exports = Helpers =
 		# Native/Custom Clone Methods
 		return obj.clone(true) if typeof obj.clone is 'function'
 		# Array Object
-		if Object::toString.call(obj) is '[object Array]'
+		if @isArray obj
 			result = obj.slice()
 			for el, idx in result
 				result[idx] = @clone el, _copied
