@@ -100,7 +100,9 @@ module.exports = StoreClass = class StoreClass
 	# Registeration Methods
 	registerActions: (actionsObj) ->
 		# Validate actionsObj is an object
-		if typeof actionsObj isnt 'object'
+		isObject = typeof actionsObj is 'object'
+		isNull = actionsObj is null
+		if (not isObject) or (isArray actionsObj) or isNull
 			throw new Error 'StoreClass registerActions: parameter passed in must be an object!'
 		# Merge with internal actions list
 		for key, val of actionsObj
@@ -114,10 +116,8 @@ module.exports = StoreClass = class StoreClass
 					if typeof element isnt 'string'
 						throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
 			@registerAction key, val
-		# console.log 'StoreClass registerActions: ', @_actions
 		@
 	registerAction: (actionName, callbackName) ->
-		# console.log 'StoreClass registerAction: ', actionName, callbackName
 		# Init _actions property
 		@_actions = {} unless @_actions
 		@_actions[actionName] = [] unless @_actions[actionName]

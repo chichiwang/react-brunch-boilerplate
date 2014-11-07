@@ -1,7 +1,7 @@
 hasOwnProperty = Object::hasOwnProperty
 objectCreate = Object.create
 if typeof objectCreate isnt 'function'
-	objectCreate = (o)->
+	objectCreate = (o) ->
 		F = ->
 		F.prototype = o
 		return new F()
