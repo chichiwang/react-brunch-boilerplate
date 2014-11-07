@@ -113,6 +113,7 @@ _dispatcherHandler = (args) ->
 module.exports = StoreClass = class StoreClass
 	_value: undefined
 	_actions: undefined # object map of actions to methods
+	_actionKeys: undefined # array of action names, used as convenience by _dispatchHandler
 	_callbacks: undefined # list of callbacks
 
 	Emitter: undefined
