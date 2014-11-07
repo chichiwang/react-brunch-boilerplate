@@ -1,6 +1,6 @@
 StoreClass = require './new_class'
 
-StoreInstance = new StoreClass
+module.exports = StoreInstance = new StoreClass
 	emitter: require 'pubsub'
 	dispatcher: require 'dispatcher'
 	actions:

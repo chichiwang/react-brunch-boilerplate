@@ -39,6 +39,7 @@ _validate = (options) ->
 	if typeof options.dispatcher isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
 	# TODO: Validate options.dispatcher has a method .register(action, value)
+
 	# See if this is even possible if the dispatcher event handler has to accept 2 args
 	#   given the FB dispatcher's functionality of only passing a single value to all registered callbacks
 	#
@@ -46,6 +47,38 @@ _validate = (options) ->
 	# Maybe create a wrapper around the FB dispatcher class
 	# It would accept 2 values, convert them into a single object and dispatch it
 	# Only register a single internal callback, handle callback execution internally, mapping to actions
+_validateActions = (fnName, actionsObj) ->
+	# Validate actionsObj is an object
+	isObject = typeof actionsObj is 'object'
+	isNull = actionsObj is null
+	if (not isObject) or (isArray actionsObj) or isNull
+		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
+	# Validate actionsObj properties
+	for key, val of actionsObj
+		if actionsObj.hasOwnProperty? and not actionsObj.hasOwnProperty key
+			continue
+		# Validate actionObj key/value pairs
+		if (typeof val isnt 'string') and (not isArray val)
+			throw new Error 'StoreClass registerActions: property ' + key + ' must contain a string or array of strings!'
+		else if (isArray val)
+			for element in val
+				if typeof element isnt 'string'
+					throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
+_validateAction = (fnName, actionName, callbackName) ->
+	if typeof actionName isnt 'string'
+		throw new Error 'StoreClass ' + fnName + ': first argument (actionName) must be a string!'
+	if (typeof callbackName isnt 'string') and (!isArray callbackName)
+		throw new Error 'StoreClass ' + fnName + ': second argument (callbackName) must be a string or an array of strings!'
+	else if (isArray callbackName)
+		for name in callbackName
+			if typeof name isnt 'string'
+				throw new Error 'StoreClass ' + fnName + ': every element of callback array assigned to ' + actionName + ' must be a string!'
+
+_removeCallbackFromAction = (actionName, callbackName) ->
+	if @_actions[actionName].indexOf(callbackName) < 0
+		console.warn 'StoreClass unregisterAction: no callback ' + callbackName + 'registered to action ' + actionName + '!'
+	else
+		@_actions[actionName].splice(@_actions[actionName].indexOf(callbackName), 1)
 
 _emitChanges = ->
 	# TODO:
@@ -99,42 +132,22 @@ module.exports = StoreClass = class StoreClass
 
 	# Registeration Methods
 	registerActions: (actionsObj) ->
-		# Validate actionsObj is an object
-		isObject = typeof actionsObj is 'object'
-		isNull = actionsObj is null
-		if (not isObject) or (isArray actionsObj) or isNull
-			throw new Error 'StoreClass registerActions: parameter passed in must be an object!'
+		_validateActions 'registerActions', actionsObj
 		# Merge with internal actions list
 		for key, val of actionsObj
-			if actionsObj.hasOwnProperty? and not actionsObj.hasOwnProperty key
-				continue
-			# Validate actionObj key/value pairs
-			if (typeof val isnt 'string') and (not isArray(val))
-				throw new Error 'StoreClass registerActions: property ' + key + ' must contain a string or array of strings!'
-			else if (isArray(val))
-				for element in val
-					if typeof element isnt 'string'
-						throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
 			@registerAction key, val
 		@
 	registerAction: (actionName, callbackName) ->
+		_validateAction 'registerAction', actionName, callbackName
 		# Init _actions property
 		@_actions = {} unless @_actions
 		@_actions[actionName] = [] unless @_actions[actionName]
-		# Assign callback string
+		# Assign callback string(s)
 		if (typeof callbackName is 'string')
 			@_actions[actionName].push callbackName if !(callbackName in @_actions[actionName])
-		# Assign callback array
 		else if isArray callbackName
 			for name in callbackName
-				if typeof name isnt 'string'
-					err = 'StoreClass registerAction: every element of callback array assigned to ' + actionName + ' must be a string!'
-					throw new Error err
 				@_actions[actionName].push(name) if !(name in @_actions[actionName])
-		# Error: not a string or array
-		else
-			err = 'StoreClass registerAction: callback name assigned to ' + actionName + ' must be a string or array of strings!'
-			throw new Error err
 		@
 	registerCallbacks: (callbacksObj) ->
 		# Validate callbacksObj is an object
@@ -160,11 +173,25 @@ module.exports = StoreClass = class StoreClass
 
 	# Unregister Methods
 	unregisterActions: (actionsObj) ->
-		# TODO:
-		# ...
+		_validateActions 'unregisterActions', actionsObj
+		# Remove from internal actions list
+		for key, val of actionsObj
+			@unregisterAction key, val
+		@
 	unregisterAction: (actionName, callbackName) ->
-		# TODO:
-		# If no callbackName, unregister all callbacks
+		_validateAction 'unregisterAction', actionName, callbackName
+		if typeof @_actions is 'undefined'
+			throw new Error 'StoreClass unregisterAction: there are no currently defined options!'
+		else if typeof @_actions[actionName] is 'undefined'
+			throw new Error 'StoreClass unregisterAction: there are no callbacks registered to action ' + actionName + '!'
+		# Remove callback string(s)
+		if typeof callbackName is 'string'
+			_removeCallbackFromAction.call @, actionName, callbackName
+		else if isArray callbackName
+			for name in callbackName
+				_removeCallbackFromAction.call @, actionName, name
+		delete @_actions[actionName] if @_actions[actionName].length is 0
+		@
 	unregisterCallbacks: (callbacksObj) ->
 		# TODO:
 		# ...
