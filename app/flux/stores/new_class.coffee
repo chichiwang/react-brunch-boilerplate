@@ -107,9 +107,9 @@ module.exports = StoreClass = class StoreClass
 			if actionsObj.hasOwnProperty? and not actionsObj.hasOwnProperty key
 				continue
 			# Validate actionObj key/value pairs
-			if (typeof val isnt 'string') and (not Helpers.isArray(val))
+			if (typeof val isnt 'string') and (not isArray(val))
 				throw new Error 'StoreClass registerActions: property ' + key + ' must contain a string or array of strings!'
-			else if (Helpers.isArray(val))
+			else if (isArray(val))
 				for element in val
 					if typeof element isnt 'string'
 						throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
@@ -125,7 +125,7 @@ module.exports = StoreClass = class StoreClass
 		if (typeof callbackName is 'string')
 			@_actions[actionName].push callbackName if !(callbackName in @_actions[actionName])
 		# Assign callback array
-		else if Helpers.isArray callbackName
+		else if isArray callbackName
 			for name in callbackName
 				if typeof name isnt 'string'
 					err = 'StoreClass registerAction: every element of callback array assigned to ' + actionName + ' must be a string!'

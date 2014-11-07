@@ -14,5 +14,9 @@ StoreInstance = new StoreClass
 		callback3: ->
 			console.log 'callback3'
 
-console.log StoreInstance.registerCallback 'callback1', ->
+StoreInstance.registerCallback 'callback1', ->
 	console.log 'callback1 override'
+
+StoreInstance._callbacks['callback1']();
+
+console.log StoreInstance
