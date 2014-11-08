@@ -57,11 +57,11 @@ _init = (options)->
 		@Dispatcher.register (args...) ->
 			_dispatcherHandler.apply(@, args)
 
-_removeCallbackFromAction = (actionName, callbackName) ->
-	if @_actions[actionName].indexOf(callbackName) < 0
-		console.warn 'StoreClass unregisterAction: no callback ' + callbackName + 'registered to action ' + actionName + '!'
+_removeCallbackFromAction = (actionId, callbackId) ->
+	if @_actions[actionId].indexOf(callbackId) < 0
+		console.warn 'StoreClass unregisterAction: no callback ' + callbackId + 'registered to action ' + actionId + '!'
 	else
-		@_actions[actionName].splice(@_actions[actionName].indexOf(callbackName), 1)
+		@_actions[actionId].splice(@_actions[actionId].indexOf(callbackId), 1)
 # TODO: ?
 # To be called on unregister of actions or callbacks
 # Iterate through all registered callback names, make sure all callback functions still exist
@@ -127,22 +127,22 @@ module.exports = StoreClass = class StoreClass
 		for key, val of actionsObj
 			@registerAction key, val
 		@
-	registerAction: (actionName, callbackName) ->
-		if typeof actionName isnt 'string'
-			throw new Error 'StoreClass registerAction: first argument (actionName) must be a string!'
-		if (typeof callbackName isnt 'string') and (!isArray callbackName)
-			throw new Error 'StoreClass registerAction: second argument (callbackName) must be a string or an array of strings!'
+	registerAction: (actionId, callbackId) ->
+		if typeof actionId isnt 'string'
+			throw new Error 'StoreClass registerAction: first argument (actionId) must be a string!'
+		if (typeof callbackId isnt 'string') and (!isArray callbackId)
+			throw new Error 'StoreClass registerAction: second argument (callbackId) must be a string or an array of strings!'
 		# Init _actions property
 		@_actions = {} unless @_actions
-		@_actions[actionName] = [] unless @_actions[actionName]
+		@_actions[actionId] = [] unless @_actions[actionId]
 		# Assign callback string(s)
-		if (typeof callbackName is 'string')
-			@_actions[actionName].push callbackName if !(callbackName in @_actions[actionName])
-		else if isArray callbackName
-			for name in callbackName
+		if (typeof callbackId is 'string')
+			@_actions[actionId].push callbackId if !(callbackId in @_actions[actionId])
+		else if isArray callbackId
+			for name in callbackId
 				if typeof name isnt 'string'
-					throw new Error 'StoreClass registerAction: every element of callback array assigned to ' + actionName + ' must be a string!'
-				@_actions[actionName].push(name) if !(name in @_actions[actionName])
+					throw new Error 'StoreClass registerAction: every element of callback array assigned to ' + actionId + ' must be a string!'
+				@_actions[actionId].push(name) if !(name in @_actions[actionId])
 		@
 	registerCallbacks: (callbacksObj) ->
 		# Validate callbacksObj is an object
@@ -157,13 +157,13 @@ module.exports = StoreClass = class StoreClass
 			@registerCallback key, val
 		# console.log 'StoreClass registerCallbacks: ', @_callbacks
 		@
-	registerCallback: (callbackName, callbackFn) ->
+	registerCallback: (callbackId, callbackFn) ->
 		@_callbacks = {} unless @_callbacks
-		if typeof callbackName isnt 'string'
-			throw new Error 'StoreClass registerCallback: callbackName passed to this method must be a string!'
+		if typeof callbackId isnt 'string'
+			throw new Error 'StoreClass registerCallback: callbackId passed to this method must be a string!'
 		if typeof callbackFn isnt 'function'
 			throw new Error 'StoreClass registerCallback: callbackFn passed to this method must be a function!'
-		@_callbacks[callbackName] = callbackFn
+		@_callbacks[callbackId] = callbackFn
 		@
 
 	# Unregister Methods
@@ -173,24 +173,24 @@ module.exports = StoreClass = class StoreClass
 		for key, val of actionsObj
 			@unregisterAction key, val
 		@
-	unregisterAction: (actionName, callbackName) ->
-		if typeof actionName isnt 'string'
-			throw new Error 'StoreClass unegisterAction: first argument (actionName) must be a string!'
+	unregisterAction: (actionId, callbackId) ->
+		if typeof actionId isnt 'string'
+			throw new Error 'StoreClass unegisterAction: first argument (actionId) must be a string!'
 		if typeof @_actions is 'undefined'
 			throw new Error 'StoreClass unregisterAction: there are no currently defined options!'
-		else if typeof @_actions[actionName] is 'undefined'
-			throw new Error 'StoreClass unregisterAction: there are no callbacks registered to action ' + actionName + '!'
+		else if typeof @_actions[actionId] is 'undefined'
+			throw new Error 'StoreClass unregisterAction: there are no callbacks registered to action ' + actionId + '!'
 		# Remove callback string(s)
-		if typeof callbackName is 'string'
-			_removeCallbackFromAction.call @, actionName, callbackName
-		else if isArray callbackName
-			for name in callbackName
-				_removeCallbackFromAction.call @, actionName, name
-		else if typeof callbackName is 'undefined'
-			@_actions[actionName] = []
+		if typeof callbackId is 'string'
+			_removeCallbackFromAction.call @, actionId, callbackId
+		else if isArray callbackId
+			for name in callbackId
+				_removeCallbackFromAction.call @, actionId, name
+		else if typeof callbackId is 'undefined'
+			@_actions[actionId] = []
 		else
-			throw new Error 'StoreClass unregisterAction: optional second argument callbackName must be a string or array of strings!'
-		delete @_actions[actionName] if @_actions[actionName].length is 0
+			throw new Error 'StoreClass unregisterAction: optional second argument callbackId must be a string or array of strings!'
+		delete @_actions[actionId] if @_actions[actionId].length is 0
 		@
 	unregisterCallbacks: (callbacksObj) ->
 		# TODO:
