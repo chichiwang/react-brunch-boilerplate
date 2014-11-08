@@ -22,18 +22,10 @@ _validate = (options) ->
 		throw new Error "StoreClass _validate: options passed to constructor must be an object!"
 	if typeof options.emitter isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed an emitter instance!"
-	# TODO: Validate options.emitter has a method .emit(action, value)
+	# TODO: Validate options.emitter has a method .emit(value)
 	if typeof options.dispatcher isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
-	# TODO: Validate options.dispatcher has a method .register(action, value)
-
-	# See if this is even possible if the dispatcher event handler has to accept 2 args
-	#   given the FB dispatcher's functionality of only passing a single value to all registered callbacks
-	#
-	# Arc.Dispatcher?
-	# Maybe create a wrapper around the FB dispatcher class
-	# It would accept 2 values, convert them into a single object and dispatch it
-	# Only register a single internal callback, handle callback execution internally, mapping to actions
+	# TODO: Validate options.dispatcher has a method .register(value)
 _validateActions = (fnName, actionsObj) ->
 	# Validate actionsObj is an object
 	isObject = typeof actionsObj is 'object'
