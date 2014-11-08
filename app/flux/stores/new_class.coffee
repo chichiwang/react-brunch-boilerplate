@@ -40,6 +40,17 @@ _validateActions = (fnName, actionsObj) ->
 			for element in val
 				if typeof element isnt 'string'
 					throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
+_validateCallbacks = (fnName, callbacksObj) ->
+	# Validate callbacksObj is an object
+	isObject = typeof callbacksObj is 'object'
+	isNull = callbacksObj is null
+	if (not isObject) or (isArray callbacksObj) or isNull
+		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
+	for key, val of callbacksObj
+		if callbacksObj.hasOwnProperty? and not callbacksObj.hasOwnProperty key
+			continue
+		if typeof val isnt 'function'
+			throw new Error 'StoreClass ' + fnName + ': property ' + key + ' of parameter must be a function!'
 
 _init = (options)->
 		# console.log '_init', options
@@ -143,17 +154,12 @@ module.exports = StoreClass = class StoreClass
 				@_actions[actionId].push(name) if !(name in @_actions[actionId])
 		@
 	registerCallbacks: (callbacksObj) ->
-		# Validate callbacksObj is an object
-		if typeof callbacksObj isnt 'object'
-			throw new Error 'StoreClass registerCallbacks: parameter passed in must be an object!'
+		_validateCallbacks 'registerCallbacks', callbacksObj
 		# Merge with internal callbacks list
 		for key, val of callbacksObj
 			if callbacksObj.hasOwnProperty? and not callbacksObj.hasOwnProperty key
 				continue
-			if typeof val isnt 'function'
-				throw new Error 'StoreClass registerCallbacks: property ' + key + ' of parameter must be a function!'
 			@registerCallback key, val
-		# console.log 'StoreClass registerCallbacks: ', @_callbacks
 		@
 	registerCallback: (callbackId, callbackFn) ->
 		@_callbacks = {} unless @_callbacks
