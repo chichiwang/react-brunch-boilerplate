@@ -40,14 +40,14 @@ _validateActions = (fnName, actionsMap) ->
 			for element in val
 				if typeof element isnt 'string'
 					throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
-_validateCallbacks = (fnName, callbacksObj) ->
-	# Validate callbacksObj is an object
-	isObject = typeof callbacksObj is 'object'
-	isNull = callbacksObj is null
-	if (not isObject) or (isArray callbacksObj) or isNull
+_validateCallbacks = (fnName, callbacksMap) ->
+	# Validate callbacksMap is an object
+	isObject = typeof callbacksMap is 'object'
+	isNull = callbacksMap is null
+	if (not isObject) or (isArray callbacksMap) or isNull
 		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
-	for key, val of callbacksObj
-		if callbacksObj.hasOwnProperty? and not callbacksObj.hasOwnProperty key
+	for key, val of callbacksMap
+		if callbacksMap.hasOwnProperty? and not callbacksMap.hasOwnProperty key
 			continue
 		if typeof val isnt 'function'
 			throw new Error 'StoreClass ' + fnName + ': property ' + key + ' of parameter must be a function!'
@@ -153,11 +153,11 @@ module.exports = StoreClass = class StoreClass
 					throw new Error 'StoreClass registerAction: every element of callback array assigned to ' + actionId + ' must be a string!'
 				@_actions[actionId].push(name) if !(name in @_actions[actionId])
 		@
-	registerCallbacks: (callbacksObj) ->
-		_validateCallbacks 'registerCallbacks', callbacksObj
+	registerCallbacks: (callbacksMap) ->
+		_validateCallbacks 'registerCallbacks', callbacksMap
 		# Merge with internal callbacks list
-		for key, val of callbacksObj
-			if callbacksObj.hasOwnProperty? and not callbacksObj.hasOwnProperty key
+		for key, val of callbacksMap
+			if callbacksMap.hasOwnProperty? and not callbacksMap.hasOwnProperty key
 				continue
 			@registerCallback key, val
 		@
@@ -196,7 +196,7 @@ module.exports = StoreClass = class StoreClass
 			throw new Error 'StoreClass unregisterAction: optional second argument callbackId must be a string or array of strings!'
 		delete @_actions[actionId] if @_actions[actionId].length is 0
 		@
-	unregisterCallbacks: (callbacksObj) ->
+	unregisterCallbacks: (callbacksMap) ->
 		# TODO:
 		# ...
 	unregisterCallback: (name, callback) ->
