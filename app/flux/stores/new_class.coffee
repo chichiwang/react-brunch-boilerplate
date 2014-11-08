@@ -60,7 +60,7 @@ _validateAction = (fnName, actionName, callbackName) ->
 		for name in callbackName
 			if typeof name isnt 'string'
 				throw new Error 'StoreClass ' + fnName + ': every element of callback array assigned to ' + actionName + ' must be a string!'
-				
+
 _init = (options)->
 		# console.log '_init', options
 		_validate options
@@ -79,6 +79,13 @@ _removeCallbackFromAction = (actionName, callbackName) ->
 		console.warn 'StoreClass unregisterAction: no callback ' + callbackName + 'registered to action ' + actionName + '!'
 	else
 		@_actions[actionName].splice(@_actions[actionName].indexOf(callbackName), 1)
+# TODO: ?
+# To be called on unregister of actions or callbacks
+# Iterate through all registered callback names, make sure all callback functions still exist
+# Remove any callback functions no longer registered to any actions
+#
+# Iterate through registered actions, make sure all callback names still exist in callbacks list
+# Remove any callback names from registered actions that no longer link to callbacks
 
 _emitChanges = ->
 	# TODO:
