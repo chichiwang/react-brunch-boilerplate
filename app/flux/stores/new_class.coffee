@@ -20,9 +20,6 @@ catch
 _validate = (options) ->
 	if typeof options isnt 'object'
 		throw new Error "StoreClass _validate: options passed to constructor must be an object!"
-	if typeof options.emitter isnt 'object'
-		throw new Error "StoreClass _validate: constructor must be passed an emitter instance!"
-	# TODO: Validate options.emitter has a method .emit(value)
 	if typeof options.dispatcher isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
 	# TODO: Validate options.dispatcher has a method .register(value)
@@ -70,6 +67,9 @@ _removeCallbackFromAction = (actionId, callbackId) ->
 # Iterate through registered actions, make sure all callback names still exist in callbacks list
 # Remove any callback names from registered actions that no longer link to callbacks
 
+# TODO:
+# Emit changes just cycles through store callbacks and fires them off
+# No need for an emitter utility/instance
 _emitChanges = ->
 	# TODO:
 	# Emit all changes to internal value
@@ -104,7 +104,6 @@ module.exports = StoreClass = class StoreClass
 	_actionKeys: undefined # array of action names, used as convenience by _dispatchHandler
 	_callbacks: undefined # list of callbacks
 
-	Emitter: undefined
 	Dispatcher: undefined
 
 	# Class Constructor
@@ -115,7 +114,6 @@ module.exports = StoreClass = class StoreClass
 	# 	callbacks:
 	# 		"function1": Fn()
 	# 		"function2": Fn()
-	# 	emitter: Emitter Instance
 	# 	dispatcher: Dispatcher Instance
 	constructor: (options = {}) ->
 		_init.call @, options
