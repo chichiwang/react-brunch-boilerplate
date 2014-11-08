@@ -51,15 +51,6 @@ _validateActions = (fnName, actionsObj) ->
 			for element in val
 				if typeof element isnt 'string'
 					throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
-_validateAction = (fnName, actionName, callbackName) ->
-	if typeof actionName isnt 'string'
-		throw new Error 'StoreClass ' + fnName + ': first argument (actionName) must be a string!'
-	if (typeof callbackName isnt 'string') and (!isArray callbackName)
-		throw new Error 'StoreClass ' + fnName + ': second argument (callbackName) must be a string or an array of strings!'
-	else if (isArray callbackName)
-		for name in callbackName
-			if typeof name isnt 'string'
-				throw new Error 'StoreClass ' + fnName + ': every element of callback array assigned to ' + actionName + ' must be a string!'
 
 _init = (options)->
 		# console.log '_init', options
@@ -145,7 +136,10 @@ module.exports = StoreClass = class StoreClass
 			@registerAction key, val
 		@
 	registerAction: (actionName, callbackName) ->
-		_validateAction 'registerAction', actionName, callbackName
+		if typeof actionName isnt 'string'
+			throw new Error 'StoreClass registerAction: first argument (actionName) must be a string!'
+		if (typeof callbackName isnt 'string') and (!isArray callbackName)
+			throw new Error 'StoreClass registerAction: second argument (callbackName) must be a string or an array of strings!'
 		# Init _actions property
 		@_actions = {} unless @_actions
 		@_actions[actionName] = [] unless @_actions[actionName]
@@ -154,6 +148,8 @@ module.exports = StoreClass = class StoreClass
 			@_actions[actionName].push callbackName if !(callbackName in @_actions[actionName])
 		else if isArray callbackName
 			for name in callbackName
+				if typeof name isnt 'string'
+					throw new Error 'StoreClass registerAction: every element of callback array assigned to ' + actionName + ' must be a string!'
 				@_actions[actionName].push(name) if !(name in @_actions[actionName])
 		@
 	registerCallbacks: (callbacksObj) ->
@@ -186,7 +182,8 @@ module.exports = StoreClass = class StoreClass
 			@unregisterAction key, val
 		@
 	unregisterAction: (actionName, callbackName) ->
-		_validateAction 'unregisterAction', actionName, callbackName
+		if typeof actionName isnt 'string'
+			throw new Error 'StoreClass unegisterAction: first argument (actionName) must be a string!'
 		if typeof @_actions is 'undefined'
 			throw new Error 'StoreClass unregisterAction: there are no currently defined options!'
 		else if typeof @_actions[actionName] is 'undefined'
@@ -197,6 +194,10 @@ module.exports = StoreClass = class StoreClass
 		else if isArray callbackName
 			for name in callbackName
 				_removeCallbackFromAction.call @, actionName, name
+		else if typeof callbackName is 'undefined'
+			@_actions[actionName] = []
+		else
+			throw new Error 'StoreClass unregisterAction: optional second argument callbackName must be a string or array of strings!'
 		delete @_actions[actionName] if @_actions[actionName].length is 0
 		@
 	unregisterCallbacks: (callbacksObj) ->
