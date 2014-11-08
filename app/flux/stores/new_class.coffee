@@ -70,13 +70,13 @@ _removeCallbackFromAction = (actionId, callbackId) ->
 		console.warn 'StoreClass unregisterAction: no callback ' + callbackId + 'registered to action ' + actionId + '!'
 	else
 		@_actions[actionId].splice(@_actions[actionId].indexOf(callbackId), 1)
-# TODO: ?
-# To be called on unregister of actions or callbacks
-# Iterate through all registered callback names, make sure all callback functions still exist
-# Remove any callback functions no longer registered to any actions
-#
-# Iterate through registered actions, make sure all callback names still exist in callbacks list
-# Remove any callback names from registered actions that no longer link to callbacks
+_actionsCallbacksCleanup = ->
+	# To be called on unregister of actions or callbacks
+	# Iterate through all registered callback names, make sure all callback functions still exist
+	# Remove any callback functions no longer registered to any actions
+	#
+	# Iterate through registered actions, make sure all callback names still exist in callbacks list
+	# Remove any callback names from registered actions that no longer link to callbacks
 
 # TODO:
 # Emit changes just cycles through store callbacks and fires them off
@@ -129,7 +129,7 @@ module.exports = StoreClass = class StoreClass
 	constructor: (options = {}) ->
 		_init.call @, options
 
-	# Registeration Methods
+	# Registration Methods
 	registerActions: (actionsMap) ->
 		_validateActions 'registerActions', actionsMap
 		# Merge with internal actions list
@@ -174,7 +174,7 @@ module.exports = StoreClass = class StoreClass
 		@_callbacks[callbackId] = callbackFn
 		@
 
-	# Unregister Methods
+	# Unregistration Methods
 	unregisterActions: (actionsMap) ->
 		_validateActions 'unregisterActions', actionsMap
 		# Remove from internal actions list
@@ -199,6 +199,7 @@ module.exports = StoreClass = class StoreClass
 		else
 			throw new Error 'StoreClass unregisterAction: optional second argument callbackId must be a string or array of strings!'
 		delete @_actions[actionId] if @_actions[actionId].length is 0
+		# TODO: Call action/callback cleanup method
 		@
 	unregisterCallbacks: (callbacksList) ->
 		if not isArray callbacksList
@@ -231,6 +232,7 @@ module.exports = StoreClass = class StoreClass
 					delete @_callbacks[key]
 		else
 			throw new Error 'StoreClass unregisterCallback: parameter passed in must be a callback id string or a function!'
+			# TODO: Call action/callback cleanup method
 		@
 
 	# Get Value, Bind and Unbind Change Methods
