@@ -17,19 +17,6 @@ catch
 
 # Static Private Methods
 # Be Sure to call these methods with fn.call(this, arg1, arg2, ...) or fn.apply(this, arguments)
-_init = (options)->
-		# console.log '_init', options
-		_validate options
-		# TODO:
-		# Step through actions if actions and register them
-		@registerActions(options.actions) if options.actions
-		@registerCallbacks(options.callbacks) if options.callbacks
-
-		@Emitter = options.emitter
-		@Dispatcher = options.dispatcher
-		@Dispatcher.register (args...) ->
-			_dispatcherHandler.apply(@, args)
-
 _validate = (options) ->
 	if typeof options isnt 'object'
 		throw new Error "StoreClass _validate: options passed to constructor must be an object!"
@@ -73,6 +60,19 @@ _validateAction = (fnName, actionName, callbackName) ->
 		for name in callbackName
 			if typeof name isnt 'string'
 				throw new Error 'StoreClass ' + fnName + ': every element of callback array assigned to ' + actionName + ' must be a string!'
+				
+_init = (options)->
+		# console.log '_init', options
+		_validate options
+		# TODO:
+		# Step through actions if actions and register them
+		@registerActions(options.actions) if options.actions
+		@registerCallbacks(options.callbacks) if options.callbacks
+
+		@Emitter = options.emitter
+		@Dispatcher = options.dispatcher
+		@Dispatcher.register (args...) ->
+			_dispatcherHandler.apply(@, args)
 
 _removeCallbackFromAction = (actionName, callbackName) ->
 	if @_actions[actionName].indexOf(callbackName) < 0
