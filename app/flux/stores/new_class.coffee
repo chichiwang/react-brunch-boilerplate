@@ -34,7 +34,7 @@ _validateActions = (fnName, actionsMap) ->
 		if actionsMap.hasOwnProperty? and not actionsMap.hasOwnProperty key
 			continue
 		# Validate actionObj key/value pairs
-		if (typeof val isnt 'string') and (not isArray val)
+		if (typeof val isnt 'string') and (typeof val isnt 'undefined') and (not isArray val)
 			throw new Error 'StoreClass registerActions: property ' + key + ' must contain a string or array of strings!'
 		else if (isArray val)
 			for element in val
@@ -134,6 +134,8 @@ module.exports = StoreClass = class StoreClass
 		_validateActions 'registerActions', actionsMap
 		# Merge with internal actions list
 		for key, val of actionsMap
+			if typeof val is 'undefined'
+				throw new Error 'StoreClass registerActions: property ' + key + ' must be a string or array of strings!'
 			@registerAction key, val
 		@
 	registerAction: (actionId, callbackId) ->
@@ -146,6 +148,8 @@ module.exports = StoreClass = class StoreClass
 		@_actions[actionId] = [] unless @_actions[actionId]
 		# Assign callback string(s)
 		if (typeof callbackId is 'string')
+			if callbackId is '*'
+				throw new Error 'StoreClass registerAction: invalid callback id assigned to action ' + actionId + '!'
 			@_actions[actionId].push callbackId if !(callbackId in @_actions[actionId])
 		else if isArray callbackId
 			for name in callbackId
@@ -181,7 +185,7 @@ module.exports = StoreClass = class StoreClass
 		if typeof actionId isnt 'string'
 			throw new Error 'StoreClass unegisterAction: first argument (actionId) must be a string!'
 		if typeof @_actions is 'undefined'
-			throw new Error 'StoreClass unregisterAction: there are no currently defined options!'
+			throw new Error 'StoreClass unregisterAction: there are no currently defined actions!'
 		else if typeof @_actions[actionId] is 'undefined'
 			throw new Error 'StoreClass unregisterAction: there are no callbacks registered to action ' + actionId + '!'
 		# Remove callback string(s)
@@ -190,18 +194,44 @@ module.exports = StoreClass = class StoreClass
 		else if isArray callbackId
 			for name in callbackId
 				_removeCallbackFromAction.call @, actionId, name
-		else if typeof callbackId is 'undefined'
+		else if (typeof callbackId is 'undefined') or (callbackId is '*')
 			@_actions[actionId] = []
 		else
 			throw new Error 'StoreClass unregisterAction: optional second argument callbackId must be a string or array of strings!'
 		delete @_actions[actionId] if @_actions[actionId].length is 0
 		@
-	unregisterCallbacks: (callbacksMap) ->
-		# TODO:
-		# ...
-	unregisterCallback: (name, callback) ->
-		# TODO:
-		# ...
+	unregisterCallbacks: (callbacksList) ->
+		if not isArray callbacksList
+			throw new Error 'StoreClass unregisterCallbacks: parameter passed in must be an array of callback ids or functions!'
+		# Remove from internal callbacks list
+		for cb in callbacksList
+			if (typeof cb isnt 'string') and (typeof cb isnt 'function')
+				throw new Error 'StoreClass unregisterCallbacks: list of callbacks to unregister must only contain string ids and functions!'
+			@unregisterCallback cb
+		@
+	unregisterCallback: (callback) ->
+		if typeof @_callbacks is 'undefined'
+			throw new Error 'StoreClass unregisterCallback: there are no currently defined callbacks!'
+		if typeof callback is 'string'
+			if typeof @_callbacks[callback] is 'undefined'
+				console.warn 'StoreClass unregisterCallback: there is no callback with the id ' + callback + '!'
+			else
+				delete @_callbacks[callback]
+		else if typeof callback is 'function'
+			found = false
+			keys = []
+			for key, val of @_callbacks
+				if callback is val
+					found = true
+					keys.push key
+			if not found
+				console.warn 'StoreClass unregisterCallback: function passed in does not match any registered callbacks!'
+			else
+				for key in keys
+					delete @_callbacks[key]
+		else
+			throw new Error 'StoreClass unregisterCallback: parameter passed in must be a callback id string or a function!'
+		@
 
 	# Get Value, Bind and Unbind Change Methods
 	get: (key) ->
