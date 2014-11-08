@@ -23,15 +23,15 @@ _validate = (options) ->
 	if typeof options.dispatcher isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
 	# TODO: Validate options.dispatcher has a method .register(value)
-_validateActions = (fnName, actionsObj) ->
-	# Validate actionsObj is an object
-	isObject = typeof actionsObj is 'object'
-	isNull = actionsObj is null
-	if (not isObject) or (isArray actionsObj) or isNull
+_validateActions = (fnName, actionsMap) ->
+	# Validate actionsMap is an object
+	isObject = typeof actionsMap is 'object'
+	isNull = actionsMap is null
+	if (not isObject) or (isArray actionsMap) or isNull
 		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
-	# Validate actionsObj properties
-	for key, val of actionsObj
-		if actionsObj.hasOwnProperty? and not actionsObj.hasOwnProperty key
+	# Validate actionsMap properties
+	for key, val of actionsMap
+		if actionsMap.hasOwnProperty? and not actionsMap.hasOwnProperty key
 			continue
 		# Validate actionObj key/value pairs
 		if (typeof val isnt 'string') and (not isArray val)
@@ -130,10 +130,10 @@ module.exports = StoreClass = class StoreClass
 		_init.call @, options
 
 	# Registeration Methods
-	registerActions: (actionsObj) ->
-		_validateActions 'registerActions', actionsObj
+	registerActions: (actionsMap) ->
+		_validateActions 'registerActions', actionsMap
 		# Merge with internal actions list
-		for key, val of actionsObj
+		for key, val of actionsMap
 			@registerAction key, val
 		@
 	registerAction: (actionId, callbackId) ->
@@ -171,10 +171,10 @@ module.exports = StoreClass = class StoreClass
 		@
 
 	# Unregister Methods
-	unregisterActions: (actionsObj) ->
-		_validateActions 'unregisterActions', actionsObj
+	unregisterActions: (actionsMap) ->
+		_validateActions 'unregisterActions', actionsMap
 		# Remove from internal actions list
-		for key, val of actionsObj
+		for key, val of actionsMap
 			@unregisterAction key, val
 		@
 	unregisterAction: (actionId, callbackId) ->
