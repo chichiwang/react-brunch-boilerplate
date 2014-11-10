@@ -1,7 +1,6 @@
 StoreClass = require './new_class'
 
 module.exports = StoreInstance = new StoreClass
-	emitter: require 'pubsub'
 	dispatcher: require 'dispatcher'
 	actions:
 		action1: "callback1"

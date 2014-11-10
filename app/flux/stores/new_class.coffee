@@ -60,7 +60,6 @@ _init = (options)->
 		@registerActions(options.actions) if options.actions
 		@registerCallbacks(options.callbacks) if options.callbacks
 
-		@Emitter = options.emitter
 		@Dispatcher = options.dispatcher
 		# @Dispatcher.register (args...) ->
 		# 	_dispatcherHandler.apply(@, args)
