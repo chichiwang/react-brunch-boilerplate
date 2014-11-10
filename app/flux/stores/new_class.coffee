@@ -55,6 +55,7 @@ _validateCallbacks = (fnName, callbacksMap) ->
 _init = (options)->
 		# console.log '_init', options
 		_validate options
+		@_history = [] unless @_history
 		# TODO:
 		# Step through actions if actions and register them
 		@registerActions(options.actions) if options.actions
@@ -118,6 +119,7 @@ _dispatcherHandler = (args) ->
 #  .. Group will allow you to listen into an entire group of stores for changes
 
 module.exports = StoreClass = class StoreClass
+	_history: undefined # list of up to 5 previous store values (immutable)
 	_value: undefined # mutable internal value
 	value: undefined # store-clone of _value which is set to be immutable
 	
