@@ -68,15 +68,28 @@ _init = (options)->
 _removeCallbackFromAction = (actionId, callbackId) ->
 	if @_actions[actionId].indexOf(callbackId) < 0
 		console.warn 'StoreClass unregisterAction: no callback ' + callbackId + 'registered to action ' + actionId + '!'
+		return false
 	else
 		@_actions[actionId].splice(@_actions[actionId].indexOf(callbackId), 1)
-_actionsCallbacksCleanup = ->
+		return true
+_cleanActionsAndCallbacks = ->
 	# To be called on unregister of actions or callbacks
 	# Iterate through all registered callback names, make sure all callback functions still exist
 	# Remove any callback functions no longer registered to any actions
 	#
 	# Iterate through registered actions, make sure all callback names still exist in callbacks list
 	# Remove any callback names from registered actions that no longer link to callbacks
+_cleanupActions = ->
+	callbacks = []
+	for callback of @_callbacks
+		callbackReferenced = false
+		for action, cbs of @_actions
+			callbackReferenced = true if cbs.indexOf(callback) >= 0
+		callbacks.push(callback) if !callbackReferenced and callbacks.indexOf(callback) < 0
+	for callback of callbacks
+		for action, cbs of @_actions
+			cbs.splice(cbs.indexOf(callback), 1) if cbs.indexOf(callback) >= 0
+			delete @_actions[action] if cbs.length is 0
 
 # TODO:
 # Emit changes just cycles through store callbacks and fires them off
@@ -113,8 +126,10 @@ module.exports = StoreClass = class StoreClass
 	value: undefined # store-clone of _value which is set to be immutable
 	
 	_actions: undefined # object map of actions to methods
-	_actionKeys: undefined # array of action names, used as convenience by _dispatchHandler
 	_callbacks: undefined # list of callbacks
+
+	# Remove this: use .hasOwnProperty on _actions instead
+	_actionKeys: undefined # array of action names, used as convenience by _dispatchHandler
 
 	Dispatcher: undefined
 
@@ -190,17 +205,20 @@ module.exports = StoreClass = class StoreClass
 		else if typeof @_actions[actionId] is 'undefined'
 			throw new Error 'StoreClass unregisterAction: there are no callbacks registered to action ' + actionId + '!'
 		# Remove callback string(s)
+		callbacksRemoved = []
 		if typeof callbackId is 'string'
 			_removeCallbackFromAction.call @, actionId, callbackId
+			callbacksRemoved.push callbackId
 		else if isArray callbackId
 			for name in callbackId
-				_removeCallbackFromAction.call @, actionId, name
+				callbacksRemoved.push(name) if _removeCallbackFromAction.call(@, actionId, name)
 		else if (typeof callbackId is 'undefined') or (callbackId is '*')
-			@_actions[actionId] = []
+			callbacksRemoved = @_actions[actionId].concat()
+			@_actions[actionId].length = 0
 		else
 			throw new Error 'StoreClass unregisterAction: optional second argument callbackId must be a string or array of strings!'
 		delete @_actions[actionId] if @_actions[actionId].length is 0
-		# TODO: Call action/callback cleanup method
+		_cleanupActions.call @
 		@
 	unregisterCallbacks: (callbacksList) ->
 		if not isArray callbacksList

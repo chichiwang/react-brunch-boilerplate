@@ -17,6 +17,4 @@ module.exports = StoreInstance = new StoreClass
 StoreInstance.registerCallback 'callback1', ->
 	console.log 'callback1 override'
 
-StoreInstance._callbacks['callback1']();
-
 console.log StoreInstance
