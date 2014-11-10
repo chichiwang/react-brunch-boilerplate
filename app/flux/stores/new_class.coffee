@@ -72,13 +72,6 @@ _removeCallbackFromAction = (actionId, callbackId) ->
 	else
 		@_actions[actionId].splice(@_actions[actionId].indexOf(callbackId), 1)
 		return true
-_cleanActionsAndCallbacks = ->
-	# To be called on unregister of actions or callbacks
-	# Iterate through all registered callback names, make sure all callback functions still exist
-	# Remove any callback functions no longer registered to any actions
-	#
-	# Iterate through registered actions, make sure all callback names still exist in callbacks list
-	# Remove any callback names from registered actions that no longer link to callbacks
 _cleanupCallbacks = ->
 	callbacks = []
 	for callback of @_callbacks
