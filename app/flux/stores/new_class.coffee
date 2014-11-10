@@ -91,8 +91,10 @@ _cleanupActions = ->
 	for action, cbs of @_actions
 		for cb in cbs
 			callbacks.push(cb) if !@_callbacks.hasOwnProperty(cb)
-	console.log '_cleanupActions', callbacks
-
+	for callback in callbacks
+		for action, cbs of @_actions
+			cbs.splice(cbs.indexOf(callback), 1) if cbs.indexOf(callback) >= 0
+			delete @_actions[action] if cbs.length is 0
 # TODO:
 # Emit changes just cycles through store callbacks and fires them off
 # No need for an emitter utility/instance
@@ -233,11 +235,13 @@ module.exports = StoreClass = class StoreClass
 	unregisterCallback: (callback) ->
 		if typeof @_callbacks is 'undefined'
 			throw new Error 'StoreClass unregisterCallback: there are no currently defined callbacks!'
+		callbackRemoved = false
 		if typeof callback is 'string'
 			if typeof @_callbacks[callback] is 'undefined'
 				console.warn 'StoreClass unregisterCallback: there is no callback with the id ' + callback + '!'
 			else
 				delete @_callbacks[callback]
+				callbackRemoved = true
 		else if typeof callback is 'function'
 			found = false
 			keys = []
@@ -250,9 +254,10 @@ module.exports = StoreClass = class StoreClass
 			else
 				for key in keys
 					delete @_callbacks[key]
+					callbackRemoved = true
 		else
 			throw new Error 'StoreClass unregisterCallback: parameter passed in must be a callback id string or a function!'
-		_cleanupActions.call @
+		_cleanupActions.call(@) if callbackRemoved
 		@
 
 	# Get Value, Bind and Unbind Change Methods
