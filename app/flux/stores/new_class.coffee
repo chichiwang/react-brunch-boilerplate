@@ -8,7 +8,7 @@ catch
 		return false
 
 # TODO:
-# Store-specific (immutable) clone class
+# Store-specific (immutable) clone method
 # Args: obj # Object to clone
 # If obj is an object, set all properties to writable: false
 # If array, copy all elements to new array - if object recurse
@@ -62,8 +62,8 @@ _init = (options)->
 
 		@Emitter = options.emitter
 		@Dispatcher = options.dispatcher
-		@Dispatcher.register (args...) ->
-			_dispatcherHandler.apply(@, args)
+		# @Dispatcher.register (args...) ->
+		# 	_dispatcherHandler.apply(@, args)
 
 _removeCallbackFromAction = (actionId, callbackId) ->
 	if @_actions[actionId].indexOf(callbackId) < 0
@@ -111,6 +111,7 @@ _dispatcherHandler = (args) ->
 module.exports = StoreClass = class StoreClass
 	_value: undefined # mutable internal value
 	value: undefined # store-clone of _value which is set to be immutable
+	
 	_actions: undefined # object map of actions to methods
 	_actionKeys: undefined # array of action names, used as convenience by _dispatchHandler
 	_callbacks: undefined # list of callbacks
