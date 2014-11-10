@@ -86,13 +86,12 @@ _cleanupCallbacks = ->
 		for action, cbs of @_actions
 			callbackReferenced = true if cbs.indexOf(callback) >= 0
 		delete @_callbacks[callback] if !callbackReferenced
-# _cleanupActions = ->
-# 	callbacks = []
-# 	for callback of @_callbacks
-# 		callbackReferenced = false
-# 		for action, cbs of @_actions
-# 			callbackReferenced = true if cbs.indexOf(callback) >= 0
-# 		callbacks.push(callback) if !callbackReferenced
+_cleanupActions = ->
+	callbacks = []
+	for action, cbs of @_actions
+		for cb in cbs
+			callbacks.push(cb) if !@_callbacks.hasOwnProperty(cb)
+	console.log '_cleanupActions', callbacks
 
 # TODO:
 # Emit changes just cycles through store callbacks and fires them off
@@ -208,20 +207,19 @@ module.exports = StoreClass = class StoreClass
 		else if typeof @_actions[actionId] is 'undefined'
 			throw new Error 'StoreClass unregisterAction: there are no callbacks registered to action ' + actionId + '!'
 		# Remove callback string(s)
-		callbacksRemoved = []
+		callbacksRemoved = false
 		if (typeof callbackId is 'string') and (callbackId isnt '*')
-			_removeCallbackFromAction.call @, actionId, callbackId
-			callbacksRemoved.push callbackId
+			callbacksRemoved = _removeCallbackFromAction.call(@, actionId, callbackId)
 		else if isArray callbackId
 			for name in callbackId
-				callbacksRemoved.push(name) if _removeCallbackFromAction.call(@, actionId, name)
+				callbacksRemoved = true if _removeCallbackFromAction.call(@, actionId, name)
 		else if (typeof callbackId is 'undefined') or (callbackId is '*')
-			callbacksRemoved = @_actions[actionId].concat()
+			callbacksRemoved = true if @_actions[actionId].length > 0
 			@_actions[actionId].length = 0
 		else
 			throw new Error 'StoreClass unregisterAction: optional second argument callbackId must be a string or array of strings!'
 		delete @_actions[actionId] if @_actions[actionId].length is 0
-		_cleanupCallbacks.call @
+		_cleanupCallbacks.call(@) if callbacksRemoved
 		@
 	unregisterCallbacks: (callbacksList) ->
 		if not isArray callbacksList
@@ -254,7 +252,7 @@ module.exports = StoreClass = class StoreClass
 					delete @_callbacks[key]
 		else
 			throw new Error 'StoreClass unregisterCallback: parameter passed in must be a callback id string or a function!'
-			# TODO: Call action/callback cleanup method
+		_cleanupActions.call @
 		@
 
 	# Get Value, Bind and Unbind Change Methods
