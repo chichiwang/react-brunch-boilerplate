@@ -17,6 +17,19 @@ catch
 
 # Static Private Methods
 # Be Sure to call these methods with fn.call(this, arg1, arg2, ...) or fn.apply(this, arguments)
+_init = (options)->
+		# console.log '_init', options
+		_validate options
+		@_history = [] unless @_history
+		# TODO:
+		# Step through actions if actions and register them
+		@registerActions(options.actions) if options.actions
+		@registerCallbacks(options.callbacks) if options.callbacks
+
+		@Dispatcher = options.dispatcher
+		# @Dispatcher.register (args...) ->
+		# 	_dispatcherHandler.apply(@, args)
+
 _validate = (options) ->
 	if typeof options isnt 'object'
 		throw new Error "StoreClass _validate: options passed to constructor must be an object!"
@@ -52,19 +65,6 @@ _validateCallbacks = (fnName, callbacksMap) ->
 		if typeof val isnt 'function'
 			throw new Error 'StoreClass ' + fnName + ': property ' + key + ' of parameter must be a function!'
 
-_init = (options)->
-		# console.log '_init', options
-		_validate options
-		@_history = [] unless @_history
-		# TODO:
-		# Step through actions if actions and register them
-		@registerActions(options.actions) if options.actions
-		@registerCallbacks(options.callbacks) if options.callbacks
-
-		@Dispatcher = options.dispatcher
-		# @Dispatcher.register (args...) ->
-		# 	_dispatcherHandler.apply(@, args)
-
 _removeCallbackFromAction = (actionId, callbackId) ->
 	if @_actions[actionId].indexOf(callbackId) < 0
 		console.warn 'StoreClass unregisterAction: no callback ' + callbackId + ' registered to action ' + actionId + '!'
@@ -79,6 +79,7 @@ _cleanupCallbacks = ->
 		for action, cbs of @_actions
 			callbackReferenced = true if cbs.indexOf(callback) >= 0
 		delete @_callbacks[callback] if !callbackReferenced
+	callbacks
 _cleanupActions = ->
 	callbacks = []
 	for action, cbs of @_actions
@@ -88,6 +89,8 @@ _cleanupActions = ->
 		for action, cbs of @_actions
 			cbs.splice(cbs.indexOf(callback), 1) if cbs.indexOf(callback) >= 0
 			delete @_actions[action] if cbs.length is 0
+	callbacks
+
 # TODO:
 # Emit changes just cycles through store callbacks and fires them off
 # No need for an emitter utility/instance
@@ -106,8 +109,71 @@ _dispatcherHandler = (args) ->
 	# If callback returns true, check for changes and emit
 	# If callback returns false, don't
 
-# TODO: METHOD GET CHANGES TO OBJ (DIFF 2 OBJS)
+# Deep diff two or more objects
+# Borrowed heavily from http://stackoverflow.com/a/1144249/1161897
+_deepDiff = (args...) ->
+	i = undefined
+	leftChain = []
+	rightChain = []
+	# TODO: track keys changed if the the root arguments are objects
+	keysChanged = []
 
+	compare = (x, y) ->
+		p = undefined
+		# NaN === NaN returns false
+		# isNan(undefined) returns true
+		if isNaN(x) and isNaN(y) and (typeof x is 'number') and (typeof y is 'number')
+			return true
+		# Compare primitives and functions
+		# Check if both arguments link to the same object
+		# Especially useful on step when comparing prototypes
+		return true if x is y
+		# Works in case when functions are created in constructor.
+		# Comparing dates is a common scenario. Another built-ins?
+		# We can even handle functions passed across iframes
+		bothFns = typeof x is 'function' and typeof y is 'function'
+		bothDates = x instanceof Date and y instanceof Date
+		bothRegExp = x instanceof RegExp and y instanceof RegExp
+		bothStrs = x instanceof String and y instanceof String
+		bothNums = x instanceof Number and y instanceof Number
+		if bothFns or bothDates or bothRegExp or bothStrs or bothNums
+			return x.toString() is y.toString()
+		# At last checking prototypes as good a we can
+		return false if not (x instanceof Object and y instanceof Object)
+		return false if x.isPrototypeOf(y) or y.isPrototypeOf(x)
+		return false if x.constructor isnt y.constructor
+		return false if x.prototype isnt y.prototype
+		# Check for infinitive linking loops
+		return false if (leftChain.indexOf(x) > -1) or (rightChain.indexOf(y) > -1)
+		# Quick checking of one object beeing a subset of another
+		# todo: cache the structure of arguments[0] for performance
+		for p of y
+			if y.hasOwnProperty(p) isnt x.hasOwnProperty(p)
+				return false
+			else if typeof y[p] isnt typeof x[p]
+				return false
+		for p of x
+			if y.hasOwnProperty(p) isnt x.hasOwnProperty(p)
+				return false
+			else if typeof y[p] isnt typeof x[p]
+				return false
+			switch typeof x[p]
+				when 'object', 'function'
+					leftChain.push x
+					rightChain.push y
+					return false if not compare(x[p], y[p])
+					leftChain.pop()
+					rightChain.pop()
+				else
+					return false if x[p] isnt y[p]
+		return true
+	if args.length < 1
+		throw new Error 'StoreClass _deepDiff: must pass 2 or more arguments to this method!'
+	for arg, idx in args
+		leftChain.length = 0
+		rightChain.length = 0
+		return false if not compare(args[0], args[idx])
+	return true
 
 
 # StoreClass
@@ -130,6 +196,8 @@ module.exports = StoreClass = class StoreClass
 	_actionKeys: undefined # array of action names, used as convenience by _dispatchHandler
 
 	Dispatcher: undefined
+
+	bigDiff: _deepDiff;
 
 	# Class Constructor
 	# options =
