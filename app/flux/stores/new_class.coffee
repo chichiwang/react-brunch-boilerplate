@@ -117,13 +117,25 @@ _deepDiff = (args...) ->
 	rightChain = []
 	# TODO: track keys changed if the the root arguments are objects
 	# if every arg.toString? and arg.toString() is '[object Object]' then they're all objects
+	allArgsAreObjects = true
+	for arg in args
+		if !(typeof arg is 'object' and arg.toString? and arg.toString() is '[object Object]')
+			allArgsAreObjects = false
+	console.log '_deepDiff allArgsAreObjects', allArgsAreObjects
 	keysChanged = []
 
 	compare = (x, y) ->
 		p = undefined
 		# NaN === NaN returns false
 		# isNan(undefined) returns true
-		if isNaN(x) and isNaN(y) and (typeof x is 'number') and (typeof y is 'number')
+		# isNaN will throw an error on objects created via Object.create()
+		try xNaN = isNaN(x)
+		catch
+			xNaN = false
+		try yNaN = isNaN(y)
+		catch
+			yNaN = false
+		if xNaN and yNaN and (typeof x is 'number') and (typeof y is 'number')
 			return true
 		# Compare primitives and functions
 		# Check if both arguments link to the same object
