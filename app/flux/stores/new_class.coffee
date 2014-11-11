@@ -116,6 +116,7 @@ _deepDiff = (args...) ->
 	leftChain = []
 	rightChain = []
 	# TODO: track keys changed if the the root arguments are objects
+	# if every arg.toString? and arg.toString() is '[object Object]' then they're all objects
 	keysChanged = []
 
 	compare = (x, y) ->
