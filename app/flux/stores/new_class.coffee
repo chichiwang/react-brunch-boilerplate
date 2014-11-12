@@ -421,11 +421,19 @@ module.exports = StoreClass = class StoreClass
 			throw new Error 'StoreClass on: StoreClass currently only handles "change" events!'
 		if typeof handler isnt 'function'
 			throw new Error 'StoreClass on: method on(event, handler) must be passed a function callback!'
+		# Init @_eventHandlers
+		@_eventHandlers = {} unless @_eventHandlers
+		evArr = ev.split ':'
+		evKey = ''
+		for str in evArr
+			evKey += str if str isnt 'change'
+		evKey = '**' if evKey is ''
+		console.log 'StoreClass on: ', evKey
 		# TODO:
 		# Bind callbacks to events
 		# events: change
 		# Allow to listen to change on a specific property
-		# Wrap the handler with a gate against events
+		# Wrap the handler with a gate against events (do this in emit method)
 		# Store wrapped handler in a list
 	off: (ev, handler) ->
 		# TODO:

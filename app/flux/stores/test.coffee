@@ -18,4 +18,10 @@ module.exports = StoreInstance = new StoreClass
 StoreInstance.registerCallback 'callback1', ->
 	console.log 'callback1 override'
 
+changeHandler = (val)->
+	console.log 'change event fired!', val
+
+StoreInstance.on('change', changeHandler)
+StoreInstance.on('change:foo', changeHandler)
+
 console.log StoreInstance
