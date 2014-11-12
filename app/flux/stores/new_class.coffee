@@ -231,8 +231,8 @@ _diffObjects = (obj1, obj2) ->
 # TODO: Enforce _value/value must be an object [object Object]
 module.exports = StoreClass = class StoreClass
 	_history: undefined # list of up to 5 previous store values (immutable)
-	_value: undefined # mutable internal value
-	value: undefined # store-clone of _value which is set to be immutable
+	_value: undefined # private internal value to diff changes against and push into the history array
+	value: undefined # value is mutable by callback functions, then checked against internal _value
 	
 	_actions: undefined # object map of actions to methods
 	_callbacks: undefined # list of callbacks
@@ -365,11 +365,17 @@ module.exports = StoreClass = class StoreClass
 		@
 
 	# Get Value, Bind and Unbind Change Methods
-	get: (key) ->
+	get: (key, numPrev) ->
 		# TODO:
-		# Retrieve value if no key
+		# Retrieve value if no key (undefined)
 		# Parse key, return key value
 		# Allow nested keys
+		# numPrev is optional and will indicate how far back in history to retrieve the key
+	getPrev: (numPrev, key) ->
+		# TODO:
+		# Call @get(key, numPrev)
+		# Convenience method when retrieving previous values
+		# (easier argument ordering - key can be optional in this instance)
 	on: (ev, callback) ->
 		# TODO:
 		# Bind callbacks to events
