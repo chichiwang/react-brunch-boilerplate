@@ -372,6 +372,8 @@ module.exports = StoreClass = class StoreClass
 	# Remove this: use .hasOwnProperty on _actions instead
 	_actionKeys: undefined # array of action names, used as convenience by _dispatchHandler
 
+	_eventHandlers: undefined # object map of events to handlers
+
 	Dispatcher: undefined
 
 	constructor: (options = {}) ->
@@ -411,15 +413,23 @@ module.exports = StoreClass = class StoreClass
 		# Convenience method when retrieving previous values
 		# (easier argument ordering - key can be optional in this instance)
 	on: (ev, callback) ->
+		# Validate arguments
+		ev = 'change' unless ev
+		if typeof ev isnt 'string'
+			throw new Error 'StoreClass on: method on(event, callback) must be passed a string event to listen for!'
+		if ev.indexOf('change') < 0
+			throw new Error 'StoreClass on: StoreClass currently only handles "change" events!'
+		if typeof callback isnt 'function'
+			throw new Error 'StoreClass on: method on(event, callback) must be passed a function callback!'
 		# TODO:
 		# Bind callbacks to events
 		# events: change
 		# Allow to listen to change on a specific property
 		# Wrap the callback with a gate against events
 		# Store wrapped callback in a list
-		# Register wrapped callback with Emitter
 	off: (ev, callback) ->
 		# TODO:
 		# Unbind callbacks from events
 		# events: change
 		# Allow to unbind a change listener from a specific property
+		# If callback isn't passed in unregister all handlers from event
