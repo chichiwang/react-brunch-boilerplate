@@ -332,15 +332,24 @@ _dispatcherHandler = (args) ->
 	# If callback returns false, don't
 
 # StoreClass
-# TODO:
-# Add a history of up to 5 previous values of _value
-# Add the ability to add a store to a group
-#  .. Create the group if the group does not already exist
-#  .. Create a global list of groups that all store instances can access
-#  .. Group will allow you to listen into an entire group of stores for changes
-
-# TODO: Enforce _value/value must be an object [object Object]
+# Class Constructor
+# options =
+# 	actions:
+# 		"action1": "function1"
+# 		"action2": "function2"
+# 	callbacks:
+# 		"function1": Fn()
+# 		"function2": Fn()
+# 	dispatcher: Dispatcher Instance
 module.exports = StoreClass = class StoreClass
+	# TODO:
+	# Add a history of up to 5 previous values of _value
+	# Add the ability to add a store to a group
+	#  .. Create the group if the group does not already exist
+	#  .. Create a global list of groups that all store instances can access
+	#  .. Group will allow you to listen into an entire group of stores for changes
+
+	# TODO: Enforce _value/value must be an object [object Object]
 	_history: undefined # list of up to 5 previous store values (immutable)
 	_value: undefined # private internal value to diff changes against and push into the history array
 	value: undefined # value is mutable by callback functions, then checked against internal _value
@@ -352,15 +361,6 @@ module.exports = StoreClass = class StoreClass
 
 	Dispatcher: undefined
 
-	# Class Constructor
-	# options =
-	# 	actions:
-	# 		"action1": "function1"
-	# 		"action2": "function2"
-	# 	callbacks:
-	# 		"function1": Fn()
-	# 		"function2": Fn()
-	# 	dispatcher: Dispatcher Instance
 	constructor: (options = {}) ->
 		_init.call @, options
 
