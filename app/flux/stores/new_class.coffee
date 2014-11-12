@@ -109,23 +109,36 @@ _dispatcherHandler = (args) ->
 	# If callback returns true, check for changes and emit
 	# If callback returns false, don't
 
-# Deep diff two or more objects
+# Deep diff two objects
+# Return the keys diff between obj1 and obj2
 # Borrowed heavily from http://stackoverflow.com/a/1144249/1161897
-_deepDiff = (args...) ->
-	i = undefined
+_diffObjects = (obj1, obj2) ->
+	allArgsAreObjects = true
+	for arg in arguments
+		if !(typeof arg is 'object' and arg.toString? and arg.toString() is '[object Object]')
+			allArgsAreObjects = false
+	if (not allArgsAreObjects) or (arguments.length isnt 2)
+		throw new Error 'StoreClass _diffObjects: must be passed 2 objects to diff'
+
 	leftChain = []
 	rightChain = []
 	keysChanged = []
-
 	# TODO: track keys changed if the the root arguments are objects
 	# if every arg.toString? and arg.toString() is '[object Object]' then they're all objects
-	allArgsAreObjects = true
-	for arg in args
-		if !(typeof arg is 'object' and arg.toString? and arg.toString() is '[object Object]')
-			allArgsAreObjects = false
-	if allArgsAreObjects
-		currKeyChain = undefined
-		currKey = undefined
+	currKeyChain = []
+	keyChain = ""
+
+	updateKeyChain = ->
+		keyChain = currKeyChain.join '.'
+	addToKeysChanged = (key) ->
+		updateKeyChain()
+		if typeof key is 'string'
+			if keyChain.length > 0
+				keysChanged.push keyChain + '.' + key
+			else
+				keysChanged.push key
+		else if typeof key is 'undefined'
+			keysChanged.push keyChain if keyChain.length > 0
 
 	compare = (x, y) ->
 		p = undefined
@@ -139,6 +152,7 @@ _deepDiff = (args...) ->
 		catch
 			yNaN = false
 		if xNaN and yNaN and (typeof x is 'number') and (typeof y is 'number')
+			console.log 'compare NaN'
 			return true
 		# Compare primitives and functions
 		# Check if both arguments link to the same object
@@ -153,44 +167,66 @@ _deepDiff = (args...) ->
 		bothStrs = x instanceof String and y instanceof String
 		bothNums = x instanceof Number and y instanceof Number
 		if bothFns or bothDates or bothRegExp or bothStrs or bothNums
-			return x.toString() is y.toString()
+			if not (x.toString() is y.toString())
+				addToKeysChanged()
+				return false
+			else
+				return true
 		# At last checking prototypes as good a we can
-		return false if not (x instanceof Object and y instanceof Object)
-		return false if x.isPrototypeOf(y) or y.isPrototypeOf(x)
-		return false if x.constructor isnt y.constructor
-		return false if x.prototype isnt y.prototype
+		if not (x instanceof Object and y instanceof Object)
+			addToKeysChanged()
+			return false
+		if x.isPrototypeOf(y) or y.isPrototypeOf(x)
+			addToKeysChanged()	
+			return false
+		if x.constructor isnt y.constructor
+			addToKeysChanged()
+			return false
+		if x.prototype isnt y.prototype
+			addToKeysChanged()
+			return false
 		# Check for infinitive linking loops
-		return false if (leftChain.indexOf(x) > -1) or (rightChain.indexOf(y) > -1)
+		if (leftChain.indexOf(x) > -1) or (rightChain.indexOf(y) > -1)
+			console.warn 'StoreClass _diffObjects: self reference found in object - aborting diff!'
+			addToKeysChanged()
+			return false
 		# Quick checking of one object beeing a subset of another
 		# todo: cache the structure of arguments[0] for performance
 		for p of y
 			if y.hasOwnProperty(p) isnt x.hasOwnProperty(p)
-				return false
+				# console.log 'compare properties exist match >>', p
+				addToKeysChanged p
 			else if typeof y[p] isnt typeof x[p]
-				return false
+				# console.log 'compare properties type match >>'
+				addToKeysChanged p
 		for p of x
+			# console.log 'compare object properties', p
 			if y.hasOwnProperty(p) isnt x.hasOwnProperty(p)
+				# console.log 'compare properties exist match >>', p
+				addToKeysChanged p
 				return false
 			else if typeof y[p] isnt typeof x[p]
+				# console.log 'compare properties type match >>'
+				addToKeysChanged p
 				return false
 			switch typeof x[p]
 				when 'object', 'function'
 					leftChain.push x
 					rightChain.push y
-					return false if not compare(x[p], y[p])
+					currKeyChain.push p
+					# console.log 'compare when object or function: ', p
+					compare(x[p], y[p])
 					leftChain.pop()
 					rightChain.pop()
+					currKeyChain.pop()
 				else
-					return false if x[p] isnt y[p]
+					if x[p] isnt y[p]
+						# console.log 'compare default >>', p
+						addToKeysChanged p
 		return true
 
-	if args.length < 1
-		throw new Error 'StoreClass _deepDiff: must pass 2 or more arguments to this method!'
-	for arg, idx in args
-		leftChain.length = 0
-		rightChain.length = 0
-		return false if not compare(args[0], args[idx])
-	return true
+	compare(obj1, obj2)
+	return keysChanged
 
 
 # StoreClass
@@ -201,6 +237,7 @@ _deepDiff = (args...) ->
 #  .. Create a global list of groups that all store instances can access
 #  .. Group will allow you to listen into an entire group of stores for changes
 
+# TODO: Enforce _value/value must be an object [object Object]
 module.exports = StoreClass = class StoreClass
 	_history: undefined # list of up to 5 previous store values (immutable)
 	_value: undefined # mutable internal value
@@ -214,7 +251,7 @@ module.exports = StoreClass = class StoreClass
 
 	Dispatcher: undefined
 
-	bigDiff: _deepDiff;
+	bigDiff: _diffObjects;
 
 	# Class Constructor
 	# options =
