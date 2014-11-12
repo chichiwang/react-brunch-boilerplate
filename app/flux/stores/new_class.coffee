@@ -145,7 +145,7 @@ _validate = (options) ->
 	# TODO: Validate options.dispatcher has a method .register(value)
 _validateActions = (fnName, actionsMap) ->
 	# Validate actionsMap is an object
-	isObject = typeof actionsMap is 'object'
+	isObject = Object::toString.call(actionsMap) is '[object Object]'
 	isNull = actionsMap is null
 	if (not isObject) or (isArray actionsMap) or isNull
 		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
@@ -162,7 +162,7 @@ _validateActions = (fnName, actionsMap) ->
 					throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
 _validateCallbacks = (fnName, callbacksMap) ->
 	# Validate callbacksMap is an object
-	isObject = typeof callbacksMap is 'object'
+	isObject = Object::toString.call(callbacksMap) is '[object Object]'
 	isNull = callbacksMap is null
 	if (not isObject) or (isArray callbacksMap) or isNull
 		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
