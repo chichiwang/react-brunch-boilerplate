@@ -124,8 +124,6 @@ _diffObjects = (obj1, obj2) ->
 	leftChain = []
 	rightChain = []
 	keysChanged = []
-	# TODO: track keys changed if the the root arguments are objects
-	# if every arg.toString? and arg.toString() is '[object Object]' then they're all objects
 	currKeyChain = []
 	keyChain = ""
 
@@ -153,7 +151,6 @@ _diffObjects = (obj1, obj2) ->
 		catch
 			yNaN = false
 		if xNaN and yNaN and (typeof x is 'number') and (typeof y is 'number')
-			console.log 'compare NaN'
 			return true
 		# Compare primitives and functions
 		# Check if both arguments link to the same object
@@ -195,19 +192,14 @@ _diffObjects = (obj1, obj2) ->
 		# todo: cache the structure of arguments[0] for performance
 		for p of y
 			if y.hasOwnProperty(p) isnt x.hasOwnProperty(p)
-				# console.log 'compare properties exist match >>', p
 				addToKeysChanged p
 			else if typeof y[p] isnt typeof x[p]
-				# console.log 'compare properties type match >>'
 				addToKeysChanged p
 		for p of x
-			# console.log 'compare object properties', p
 			if y.hasOwnProperty(p) isnt x.hasOwnProperty(p)
-				# console.log 'compare properties exist match >>', p
 				addToKeysChanged p
 				return false
 			else if typeof y[p] isnt typeof x[p]
-				# console.log 'compare properties type match >>'
 				addToKeysChanged p
 				return false
 			switch typeof x[p]
@@ -215,14 +207,12 @@ _diffObjects = (obj1, obj2) ->
 					leftChain.push x
 					rightChain.push y
 					currKeyChain.push p
-					# console.log 'compare when object or function: ', p
 					compare(x[p], y[p])
 					leftChain.pop()
 					rightChain.pop()
 					currKeyChain.pop()
 				else
 					if x[p] isnt y[p]
-						# console.log 'compare default >>', p
 						addToKeysChanged p
 		return true
 
@@ -246,13 +236,10 @@ module.exports = StoreClass = class StoreClass
 	
 	_actions: undefined # object map of actions to methods
 	_callbacks: undefined # list of callbacks
-
 	# Remove this: use .hasOwnProperty on _actions instead
 	_actionKeys: undefined # array of action names, used as convenience by _dispatchHandler
 
 	Dispatcher: undefined
-
-	bigDiff: _diffObjects;
 
 	# Class Constructor
 	# options =
