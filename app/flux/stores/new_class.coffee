@@ -21,12 +21,11 @@ _init = (options)->
 		# console.log '_init', options
 		_validate options
 		@_history = [] unless @_history
-		# TODO:
-		# Step through actions if actions and register them
 		@registerActions(options.actions) if options.actions
 		@registerCallbacks(options.callbacks) if options.callbacks
 
 		@Dispatcher = options.dispatcher
+		# TODO: Initialize dispatch handler and callback management
 		# @Dispatcher.register (args...) ->
 		# 	_dispatcherHandler.apply(@, args)
 
