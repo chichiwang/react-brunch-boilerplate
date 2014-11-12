@@ -115,14 +115,17 @@ _deepDiff = (args...) ->
 	i = undefined
 	leftChain = []
 	rightChain = []
+	keysChanged = []
+
 	# TODO: track keys changed if the the root arguments are objects
 	# if every arg.toString? and arg.toString() is '[object Object]' then they're all objects
 	allArgsAreObjects = true
 	for arg in args
 		if !(typeof arg is 'object' and arg.toString? and arg.toString() is '[object Object]')
 			allArgsAreObjects = false
-	console.log '_deepDiff allArgsAreObjects', allArgsAreObjects
-	keysChanged = []
+	if allArgsAreObjects
+		currKeyChain = undefined
+		currKey = undefined
 
 	compare = (x, y) ->
 		p = undefined
@@ -180,6 +183,7 @@ _deepDiff = (args...) ->
 				else
 					return false if x[p] isnt y[p]
 		return true
+
 	if args.length < 1
 		throw new Error 'StoreClass _deepDiff: must pass 2 or more arguments to this method!'
 	for arg, idx in args
