@@ -14,7 +14,7 @@ catch
 _diffObjects = (obj1, obj2) ->
 	allArgsAreObjects = true
 	for arg in arguments
-		if !(typeof arg is 'object' and arg.toString? and arg.toString() is '[object Object]')
+		if !(Object::toString.call(arg) is '[object Object]')
 			allArgsAreObjects = false
 	if (not allArgsAreObjects) or (arguments.length isnt 2)
 		throw new Error 'StoreClass _diffObjects: must be passed 2 objects to diff'
@@ -63,7 +63,7 @@ _diffObjects = (obj1, obj2) ->
 		bothStrs = x instanceof String and y instanceof String
 		bothNums = x instanceof Number and y instanceof Number
 		if bothFns or bothDates or bothRegExp or bothStrs or bothNums
-			if not (x.toString() is y.toString())
+			if not (Object::toString.call(x) is Object::toString.call(y))
 				addToKeysChanged()
 				return false
 			else
