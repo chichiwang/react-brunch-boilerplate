@@ -112,6 +112,7 @@ _dispatcherHandler = (args) ->
 # Deep diff two objects
 # Return the keys diff between obj1 and obj2
 # Borrowed heavily from http://stackoverflow.com/a/1144249/1161897
+# TODO: store must check against each diff returned to see if the chain exists in the full chain string
 _diffObjects = (obj1, obj2) ->
 	allArgsAreObjects = true
 	for arg in arguments
