@@ -1,11 +1,61 @@
 'use strict'
 
 # Helper Utility Methods
+# Note: Change the require path to access the global framework object when modularizing
 try isArray = require('util/helpers').isArray
 catch
 	isArray = (obj) ->
 		return true if Object::toString.call(obj) is '[object Array]'
 		return false
+try clone = require('util/helpers').clone
+catch
+	objectCreate = Object.create
+	if typeof objectCreate isnt 'function'
+		objectCreate = (o) ->
+			F = ->
+			F.prototype = o
+			return new F()
+	clone = (obj, _copied) ->
+		# Null or Undefined
+		if not obj? or typeof obj isnt 'object'
+			return obj
+
+		# Init _copied list (used internally)
+		if typeof _copied is 'undefined'
+			_copied = []
+		else return obj if obj in _copied
+		_copied.push obj
+
+		# Native/Custom Clone Methods
+		return obj.clone(true) if typeof obj.clone is 'function'
+		# Array Object
+		if @isArray obj
+			result = obj.slice()
+			for el, idx in result
+				result[idx] = @clone el, _copied
+			return result
+		# Date Object
+		if obj instanceof Date
+			return new Date(obj.getTime())
+		# RegExp Object
+		if obj instanceof RegExp
+			flags = ''
+			flags += 'g' if obj.global?
+			flags += 'i' if obj.ignoreCase?
+			flags += 'm' if obj.multiline?
+			flags += 'y' if obj.sticky?
+			return new RegExp(obj.source, flags)
+		# DOM Element
+		if obj.nodeType? and typeof obj.cloneNode is 'function'
+			return obj.cloneNode(true)
+
+		# Recurse
+		proto = if Object.getPrototypeOf? then Object.getPrototypeOf(obj) else obj.__proto__
+		proto = obj.constructor.prototype unless proto
+		result = objectCreate proto
+		for key, val of obj
+			result[key] = @clone val, _copied
+		return result
 
 # Deep diff two objects
 # Return the keys diff between obj1 and obj2
@@ -311,6 +361,10 @@ _unregisterCallback = (callback) ->
 		throw new Error 'StoreClass unregisterCallback: parameter passed in must be a callback id string or a function!'
 	_cleanupActions.call(@) if callbackRemoved
 	@
+
+_syncValues = ->
+	# TODO push the old value into history, if there was an old value
+	# @_value = clone(@value)
 
 # Dispatch Event Handlers
 _dispatchHandler = (payload)->
