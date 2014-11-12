@@ -10,11 +10,10 @@ catch
 # Deep diff two objects
 # Return the keys diff between obj1 and obj2
 # Borrowed heavily from http://stackoverflow.com/a/1144249/1161897
-# TODO: store must check against each diff returned to see if the chain exists in the full chain string
 _diffObjects = (obj1, obj2) ->
 	allArgsAreObjects = true
 	for arg in arguments
-		if !(Object::toString.call(arg) is '[object Object]')
+		if Object::toString.call(arg) isnt '[object Object]'
 			allArgsAreObjects = false
 	if (not allArgsAreObjects) or (arguments.length isnt 2)
 		throw new Error 'StoreClass _diffObjects: must be passed 2 objects to diff'
@@ -62,7 +61,7 @@ _diffObjects = (obj1, obj2) ->
 		bothStrs = x instanceof String and y instanceof String
 		bothNums = x instanceof Number and y instanceof Number
 		if bothFns or bothDates or bothRegExp or bothStrs or bothNums
-			if not (Object::toString.call(x) is Object::toString.call(y))
+			if Object::toString.call(x) isnt Object::toString.call(y)
 				addToKeysChanged()
 				return false
 			else
@@ -135,8 +134,7 @@ _init = (options)->
 
 		@Dispatcher = options.dispatcher
 		# TODO: Initialize dispatch handler and callback management
-		# @Dispatcher.register (args...) ->
-		# 	_dispatcherHandler.apply(@, args)
+		@Dispatcher.register @_callDispatchHandler
 
 # Validation Methods
 _validate = (options) ->
@@ -312,6 +310,30 @@ _unregisterCallback = (callback) ->
 	_cleanupActions.call(@) if callbackRemoved
 	@
 
+# Dispatch Event Handlers
+_dispatchHandler = (payload)->
+	# Validate payload
+	if Object::toString.call(payload) isnt '[object Object]'
+		console.warn 'StoreClass _dispatchHandler expects a single object payload! Aborting...'
+		return
+	if typeof payload.actionId isnt 'string'
+		console.warn 'StoreClass _dispatchHandler expects a string actionId in the payload! Aborting...'
+		return
+	if (typeof payload.value isnt 'object') and (Object::toString.call(payload.value) isnt '[object Object]')
+		console.warn 'StoreClass _dispatchHandler expects an object value in the payload! Aborting...'
+		return
+
+	# for action, callbacks of @_actions
+	# 	#...
+	# TODO:
+	# check against internal _actions and _callbacks to find correct callback
+	# Invoke associated callbacks, passing the context
+	#
+	# Expect callback to affect @value
+	# When callback is complete, diff @value against @_value
+	# If there are changes, emit the changes to all registered change handlers
+	# TODO: store must check against each diff returned to see if the chain exists in the full chain string
+
 # TODO:
 # Emit changes just cycles through store callbacks and fires them off
 # No need for an emitter utility/instance
@@ -321,14 +343,6 @@ _emitChanges = ->
 _emitChange = (ev, val) ->
 	# TODO:
 	# Fire emitter with event and value
-
-_dispatcherHandler = (args) ->
-	console.log 'StoreClass _dispatcherHandler: ', args
-	# TODO:
-	# check against internal _actions and _callbacks to find correct callback
-	# Invoke associated callbacks, passing the this context
-	# If callback returns true, check for changes and emit
-	# If callback returns false, don't
 
 # StoreClass
 # Class Constructor
@@ -362,6 +376,8 @@ module.exports = StoreClass = class StoreClass
 
 	constructor: (options = {}) ->
 		_init.call @, options
+	_callDispatchHandler: (args...)->
+		_dispatchHandler.apply @, args
 
 	# Public Registration Methods
 	registerActions: (args...) ->
