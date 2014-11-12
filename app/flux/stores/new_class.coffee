@@ -138,10 +138,12 @@ _init = (options)->
 
 # Validation Methods
 _validate = (options) ->
-	if typeof options isnt 'object'
+	if Object::toString.call(options) isnt '[object Object]'
 		throw new Error "StoreClass _validate: options passed to constructor must be an object!"
 	if typeof options.dispatcher isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
+	if (typeof options.initial isnt 'undefined') and (Object::toString.call(options.initial) isnt '[object Object]')
+		throw new Error "StoreClass _validate: initial property of options passed to constructor must be an object!"
 	# TODO: Validate options.dispatcher has a method .register(value)
 _validateActions = (fnName, actionsMap) ->
 	# Validate actionsMap is an object
@@ -354,6 +356,9 @@ _emitChange = (ev, val) ->
 # 		"function1": Fn()
 # 		"function2": Fn()
 # 	dispatcher: Dispatcher Instance
+#	initial:
+#		key1: val1
+#		key2: val2
 module.exports = StoreClass = class StoreClass
 	# TODO:
 	# Add a history of up to 5 previous values of _value
