@@ -38,7 +38,6 @@ _diffObjects = (obj1, obj2) ->
 			keysChanged.push keyChain if keyChain.length > 0
 
 	compare = (x, y) ->
-		p = undefined
 		# NaN === NaN returns false
 		# isNan(undefined) returns true
 		# isNaN will throw an error on objects created via Object.create()
