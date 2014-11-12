@@ -474,6 +474,10 @@ module.exports = StoreClass = class StoreClass
 		# Convenience method when retrieving previous values
 		# (easier argument ordering - key can be optional in this instance)
 	on: (ev, handler) ->
+		# TODO:
+		# Allow one argument to be passed in (declarative ev: handler() object)
+		# Or two arguments to be passed in (event, handler())
+		
 		# Validate arguments
 		ev = 'change' unless ev
 		if typeof ev isnt 'string'
@@ -489,6 +493,7 @@ module.exports = StoreClass = class StoreClass
 		for str in evArr
 			evKey += str if str isnt 'change'
 		evKey = '**' if evKey is ''
+		# Register handlers to list @_eventHandlers
 		console.log 'StoreClass on: ', evKey
 		# TODO:
 		# Bind callbacks to events
