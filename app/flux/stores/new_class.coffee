@@ -165,13 +165,6 @@ _diffObjects = (obj1, obj2) ->
 	compare(obj1, obj2)
 	return keysChanged
 
-# TODO:
-# Store-specific (immutable) clone method
-# Args: obj # Object to clone
-# If obj is an object, set all properties to writable: false
-# If array, copy all elements to new array - if object recurse
-# If any other type of value return it
-
 
 # Static Private Methods
 # Be Sure to call these methods with fn.call(this, arg1, arg2, ...) or fn.apply(this, arguments)
@@ -431,7 +424,7 @@ module.exports = StoreClass = class StoreClass
 	#  .. Group will allow you to listen into an entire group of stores for changes
 
 	# TODO: Enforce _value/value must be an object [object Object]
-	_history: undefined # list of up to 5 previous store values (immutable)
+	_history: undefined # list of up to 5 previous store values
 	_value: undefined # private internal value to diff changes against and push into the history array
 	value: undefined # value is mutable by callback functions, then checked against internal _value
 	
