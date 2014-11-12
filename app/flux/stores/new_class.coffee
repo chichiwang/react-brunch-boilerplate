@@ -412,24 +412,24 @@ module.exports = StoreClass = class StoreClass
 		# Call @get(key, numPrev)
 		# Convenience method when retrieving previous values
 		# (easier argument ordering - key can be optional in this instance)
-	on: (ev, callback) ->
+	on: (ev, handler) ->
 		# Validate arguments
 		ev = 'change' unless ev
 		if typeof ev isnt 'string'
-			throw new Error 'StoreClass on: method on(event, callback) must be passed a string event to listen for!'
+			throw new Error 'StoreClass on: method on(event, handler) must be passed a string event to listen for!'
 		if ev.indexOf('change') < 0
 			throw new Error 'StoreClass on: StoreClass currently only handles "change" events!'
-		if typeof callback isnt 'function'
-			throw new Error 'StoreClass on: method on(event, callback) must be passed a function callback!'
+		if typeof handler isnt 'function'
+			throw new Error 'StoreClass on: method on(event, handler) must be passed a function callback!'
 		# TODO:
 		# Bind callbacks to events
 		# events: change
 		# Allow to listen to change on a specific property
-		# Wrap the callback with a gate against events
-		# Store wrapped callback in a list
-	off: (ev, callback) ->
+		# Wrap the handler with a gate against events
+		# Store wrapped handler in a list
+	off: (ev, handler) ->
 		# TODO:
-		# Unbind callbacks from events
+		# Unbind handlers from events
 		# events: change
 		# Allow to unbind a change listener from a specific property
-		# If callback isn't passed in unregister all handlers from event
+		# If handler isn't passed in unregister all handlers from event
