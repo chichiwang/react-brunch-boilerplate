@@ -29,10 +29,10 @@ catch
 		# Native/Custom Clone Methods
 		return obj.clone(true) if typeof obj.clone is 'function'
 		# Array Object
-		if @isArray obj
+		if isArray obj
 			result = obj.slice()
 			for el, idx in result
-				result[idx] = @clone el, _copied
+				result[idx] = clone el, _copied
 			return result
 		# Date Object
 		if obj instanceof Date
@@ -54,7 +54,7 @@ catch
 		proto = obj.constructor.prototype unless proto
 		result = objectCreate proto
 		for key, val of obj
-			result[key] = @clone val, _copied
+			result[key] = clone val, _copied
 		return result
 
 # Deep diff two objects
@@ -178,7 +178,12 @@ _diffObjects = (obj1, obj2) ->
 _init = (options)->
 		# console.log '_init', options
 		_validate options
+		# Init values
 		@_history = [] unless @_history
+		if typeof options.initial isnt 'undefined'
+			@value = options.initial
+			_syncValues.call @
+
 		@registerActions(options.actions) if options.actions
 		@registerCallbacks(options.callbacks) if options.callbacks
 
@@ -364,7 +369,7 @@ _unregisterCallback = (callback) ->
 
 _syncValues = ->
 	# TODO push the old value into history, if there was an old value
-	# @_value = clone(@value)
+	@_value = clone(@value)
 
 # Dispatch Event Handlers
 _dispatchHandler = (payload)->

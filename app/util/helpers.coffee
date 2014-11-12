@@ -42,10 +42,10 @@ module.exports = Helpers =
 		# Native/Custom Clone Methods
 		return obj.clone(true) if typeof obj.clone is 'function'
 		# Array Object
-		if @isArray obj
+		if isArray obj
 			result = obj.slice()
 			for el, idx in result
-				result[idx] = @clone el, _copied
+				result[idx] = clone el, _copied
 			return result
 		# Date Object
 		if obj instanceof Date
@@ -67,8 +67,11 @@ module.exports = Helpers =
 		proto = obj.constructor.prototype unless proto
 		result = objectCreate proto
 		for key, val of obj
-			result[key] = @clone val, _copied
+			result[key] = clone val, _copied
 		return result
 	merge: (destination, sources...) ->
 		# TODO: Write a deep extend method
 		console.log 'Helpers.merge: ', destination, sources
+
+isArray = Helpers.isArray
+clone = Helpers.clone
