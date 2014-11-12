@@ -367,8 +367,12 @@ _unregisterCallback = (callback) ->
 	_cleanupActions.call(@) if callbackRemoved
 	@
 
+# Value helper methods
+_addToHistory = (val) ->
+	if @_history.unshift(val) > 5
+		@_history.length = 5
 _syncValues = ->
-	# TODO push the old value into history, if there was an old value
+	@_addToHistory.call(@, @_value) if @_value
 	@_value = clone(@value)
 
 # Dispatch Event Handlers
