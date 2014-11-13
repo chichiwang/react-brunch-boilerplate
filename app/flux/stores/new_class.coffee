@@ -477,7 +477,7 @@ module.exports = StoreClass = class StoreClass
 		# TODO:
 		# Allow one argument to be passed in (declarative ev: handler() object)
 		# Or two arguments to be passed in (event, handler())
-		
+
 		# Validate arguments
 		ev = 'change' unless ev
 		if typeof ev isnt 'string'
@@ -488,19 +488,21 @@ module.exports = StoreClass = class StoreClass
 			throw new Error 'StoreClass on: method on(event, handler) must be passed a function callback!'
 		# Init @_eventHandlers
 		@_eventHandlers = {} unless @_eventHandlers
+		# Prepare event id
 		evArr = ev.split ':'
-		evKey = ''
+		evId = ''
 		for str in evArr
-			evKey += str if str isnt 'change'
-		evKey = '**' if evKey is ''
-		# Register handlers to list @_eventHandlers
-		console.log 'StoreClass on: ', evKey
+			evId += str if str isnt 'change'
+		evId = '**' if evId is ''
+		# Register handlers to the list @_eventHandlers
+		@_eventHandlers[evId] = [] unless @_eventHandlers[evId]
+		if @_eventHandlers[evId].indexOf(handler) >= 0
+			console.warn 'StoreClass on: handler for event ' + ev + ' already bound!'
+		else
+			@_eventHandlers[evId].push handler
+		console.log 'StoreClass on: ', @_eventHandlers
 		# TODO:
-		# Bind callbacks to events
-		# events: change
-		# Allow to listen to change on a specific property
 		# Wrap the handler with a gate against events (do this in emit method)
-		# Store wrapped handler in a list
 	off: (ev, handler) ->
 		# TODO:
 		# Unbind handlers from events
