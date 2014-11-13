@@ -224,6 +224,23 @@ _validateCallbacks = (fnName, callbacksMap) ->
 			continue
 		if typeof val isnt 'function'
 			throw new Error 'StoreClass ' + fnName + ': property ' + key + ' of parameter must be a function!'
+_validateBindHandlers = (fnName, ev, handler) ->
+	if (typeof ev isnt 'string') and (Object::toString.call(ev) isnt '[object Object]')
+		throw new Error 'StoreClass ' + fnName + '(): arguments passed in must be either (event, handler) or (eventsMap)!'
+	if (typeof ev is 'string') and (typeof handler isnt 'function' and Object::toString.call(handler) isnt '[object Array]')
+		throw new Error 'StoreClass ' + fnName + '(): second argument must be a function or array of functions!'
+	if Object::toString.call(handler) is '[object Array]'
+		for cb in handler
+			if typeof cb isnt 'function'
+				throw new Error 'StoreClass ' + fnName + '(): element in handler array is not a function!'
+	else if Object::toString.call(ev) is '[object Object]'
+		for evId, cb of ev
+			if (typeof cb isnt 'function') and (Object::toString.call(cb) isnt '[object Array]')
+				throw new Error 'StoreClass ' + fnName + '(): events map properties must contain event callback functions!'
+			if Object::toString.call(cb) is '[object Array]'
+				for fn in cb
+					if typeof fn isnt 'function'
+						throw new Error 'StoreClass ' + fnName + '(): events map properties must contain event callback functions!'
 
 # Registration/Unregistration Helpers
 _removeCallbackFromAction = (actionId, callbackId) ->
@@ -372,25 +389,8 @@ _syncValues = ->
 	@_value = clone(@value)
 
 # Event handler registration/unregistration
-_validateHandlers = (fnName, ev, handler) ->
-	if (typeof ev isnt 'string') and (Object::toString.call(ev) isnt '[object Object]')
-		throw new Error 'StoreClass ' + fnName + '(): arguments passed in must be either (event, handler) or (eventsMap)!'
-	if (typeof ev is 'string') and (typeof handler isnt 'function' and Object::toString.call(handler) isnt '[object Array]')
-		throw new Error 'StoreClass ' + fnName + '(): second argument must be a function or array of functions!'
-	if Object::toString.call(handler) is '[object Array]'
-		for cb in handler
-			if typeof cb isnt 'function'
-				throw new Error 'StoreClass ' + fnName + '(): element in handler array is not a function!'
-	else if Object::toString.call(ev) is '[object Object]'
-		for evId, cb of ev
-			if (typeof cb isnt 'function') and (Object::toString.call(cb) isnt '[object Array]')
-				throw new Error 'StoreClass ' + fnName + '(): events map properties must contain event callback functions!'
-			if Object::toString.call(cb) is '[object Array]'
-				for fn in cb
-					if typeof fn isnt 'function'
-						throw new Error 'StoreClass ' + fnName + '(): events map properties must contain event callback functions!'
 _bindEventHandlers = (ev, handler) ->
-	_validateHandlers 'on', ev, handler
+	_validateBindHandlers 'on', ev, handler
 	if (typeof ev is 'string') and (typeof handler is 'function')
 		_bindEventHandler.call @, ev, handler
 	else if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Array]')
