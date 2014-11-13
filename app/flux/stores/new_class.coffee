@@ -179,6 +179,7 @@ _init = (options)->
 
 		@registerActions(options.actions) if options.actions
 		@registerCallbacks(options.callbacks) if options.callbacks
+		@on(options.events) if options.events
 
 		@Dispatcher = options.dispatcher
 		# TODO: Initialize dispatch handler and callback management
@@ -192,6 +193,8 @@ _validate = (options) ->
 		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
 	if (typeof options.initial isnt 'undefined') and (Object::toString.call(options.initial) isnt '[object Object]')
 		throw new Error "StoreClass _validate: initial property of options passed to constructor must be an object!"
+	if (typeof options.events isnt 'undefined') and (Object::toString.call(options.events) isnt '[object Object]')
+		throw new Error "StoreClass _validate: events property of options passed to constructor must be an object!"
 	# TODO: Validate options.dispatcher has a method .register(value)
 _validateActions = (fnName, actionsMap) ->
 	# Validate actionsMap is an object
@@ -368,6 +371,46 @@ _syncValues = ->
 	@_addToHistory.call(@, @_value) if @_value
 	@_value = clone(@value)
 
+# Event handler registration/unregistration
+_bindEventHandlers = (ev, handler) ->
+	if (typeof ev isnt 'string') and (Object::toString.call(ev) isnt '[object Object]')
+		throw new Error 'StoreClass on: method on() must be passed either (event, handler) or (eventsMap)!'
+	if (typeof ev is 'string') and (typeof handler isnt 'function')
+		throw new Error 'StoreClass on: handler passed into method on() must be a function!'
+
+	if (typeof ev is 'string') and (typeof handler is 'function')
+		_bindEventHandler.call @, ev, handler
+	else
+		for evId, cb of ev
+			if (typeof cb isnt 'function') and (Object::toString.call(cb) isnt '[object Array]')
+				throw new Error 'StoreClass on: events map properties must contain event callback functions!'
+			if Object::toString.call(cb) is '[object Array]'
+				for fn in cb
+					if typeof fn isnt 'function'
+						throw new Error 'StoreClass on: events map properties must contain event callback functions!'
+					_bindEventHandler.call @, evId, fn
+			else
+				_bindEventHandler.call @, evId, cb
+_bindEventHandler = (ev, handler) ->
+	# Validate arguments
+	ev = 'change' unless ev
+	if ev.indexOf('change') < 0
+		throw new Error 'StoreClass on: StoreClass currently only handles "change" events!'
+	# Init @_eventHandlers
+	@_eventHandlers = {} unless @_eventHandlers
+	# Prepare event id
+	evArr = ev.split ':'
+	evId = ''
+	for str in evArr
+		evId += str if str isnt 'change'
+	evId = '**' if evId is ''
+	# Register handlers to the list @_eventHandlers
+	@_eventHandlers[evId] = [] unless @_eventHandlers[evId]
+	if @_eventHandlers[evId].indexOf(handler) >= 0
+		console.warn 'StoreClass on: handler for event ' + ev + ' already bound!'
+	else
+		@_eventHandlers[evId].push handler
+
 # Dispatch Event Handlers
 _dispatchHandler = (payload)->
 	# Validate payload
@@ -473,36 +516,8 @@ module.exports = StoreClass = class StoreClass
 		# Call @get(key, numPrev)
 		# Convenience method when retrieving previous values
 		# (easier argument ordering - key can be optional in this instance)
-	on: (ev, handler) ->
-		# TODO:
-		# Allow one argument to be passed in (declarative ev: handler() object)
-		# Or two arguments to be passed in (event, handler())
-
-		# Validate arguments
-		ev = 'change' unless ev
-		if typeof ev isnt 'string'
-			throw new Error 'StoreClass on: method on(event, handler) must be passed a string event to listen for!'
-		if ev.indexOf('change') < 0
-			throw new Error 'StoreClass on: StoreClass currently only handles "change" events!'
-		if typeof handler isnt 'function'
-			throw new Error 'StoreClass on: method on(event, handler) must be passed a function callback!'
-		# Init @_eventHandlers
-		@_eventHandlers = {} unless @_eventHandlers
-		# Prepare event id
-		evArr = ev.split ':'
-		evId = ''
-		for str in evArr
-			evId += str if str isnt 'change'
-		evId = '**' if evId is ''
-		# Register handlers to the list @_eventHandlers
-		@_eventHandlers[evId] = [] unless @_eventHandlers[evId]
-		if @_eventHandlers[evId].indexOf(handler) >= 0
-			console.warn 'StoreClass on: handler for event ' + ev + ' already bound!'
-		else
-			@_eventHandlers[evId].push handler
-		console.log 'StoreClass on: ', @_eventHandlers
-		# TODO:
-		# Wrap the handler with a gate against events (do this in emit method)
+	on: (args...) ->
+		_bindEventHandlers.apply @, args
 	off: (ev, handler) ->
 		# TODO:
 		# Unbind handlers from events

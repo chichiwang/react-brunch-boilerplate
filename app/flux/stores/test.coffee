@@ -1,5 +1,10 @@
 StoreClass = require './new_class'
 
+changeHandler1 = (val) ->
+	console.log 'changeHandler1: ', val
+changeHandler2 = (val) ->
+	console.log 'changeHandler2: ', val
+
 module.exports = StoreInstance = new StoreClass
 	dispatcher: require 'dispatcher'
 	actions:
@@ -20,14 +25,14 @@ module.exports = StoreInstance = new StoreClass
 		key3: ['key', '3']
 		key4:
 			foo: 'bar'
+	events:
+		'change': changeHandler1,
+		'change:key1': [changeHandler1, changeHandler2]
 
 StoreInstance.registerCallback 'callback1', ->
 	console.log 'callback1 override'
 
-changeHandler = (val)->
-	console.log 'change event fired!', val
-
-StoreInstance.on('change', changeHandler)
-StoreInstance.on('change:foo', changeHandler)
+# StoreInstance.on('change', changeHandler1)
+# StoreInstance.on('change:foo', changeHandler2)
 
 console.log StoreInstance
