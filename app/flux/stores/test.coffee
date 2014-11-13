@@ -25,14 +25,14 @@ module.exports = StoreInstance = new StoreClass
 		key3: ['key', '3']
 		key4:
 			foo: 'bar'
-	events:
-		'change': changeHandler1,
-		'change:key1': [changeHandler1, changeHandler2]
+	# events:
+	# 	'change': changeHandler1,
+	# 	'change:key1': [changeHandler1, changeHandler2]
 
 StoreInstance.registerCallback 'callback1', ->
 	console.log 'callback1 override'
 
-# StoreInstance.on('change', changeHandler1)
-# StoreInstance.on('change:foo', changeHandler2)
+StoreInstance.on('change', changeHandler1)
+StoreInstance.on('change:key1', [changeHandler1, changeHandler2])
 
 console.log StoreInstance

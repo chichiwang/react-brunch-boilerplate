@@ -375,11 +375,16 @@ _syncValues = ->
 _bindEventHandlers = (ev, handler) ->
 	if (typeof ev isnt 'string') and (Object::toString.call(ev) isnt '[object Object]')
 		throw new Error 'StoreClass on: method on() must be passed either (event, handler) or (eventsMap)!'
-	if (typeof ev is 'string') and (typeof handler isnt 'function')
-		throw new Error 'StoreClass on: handler passed into method on() must be a function!'
+	if (typeof ev is 'string') and (typeof handler isnt 'function' and Object::toString.call(handler) isnt '[object Array]')
+		throw new Error 'StoreClass on: handler passed into method on() must be a function or array of functions!'
 
 	if (typeof ev is 'string') and (typeof handler is 'function')
 		_bindEventHandler.call @, ev, handler
+	else if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Array]')
+		for cb in handler
+			if typeof cb isnt 'function'
+				throw new Error 'StoreClass on: events map properties must contain event callback functions!'
+			_bindEventHandler.call @, ev, cb
 	else
 		for evId, cb of ev
 			if (typeof cb isnt 'function') and (Object::toString.call(cb) isnt '[object Array]')
