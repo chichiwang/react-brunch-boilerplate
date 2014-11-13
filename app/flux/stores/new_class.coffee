@@ -403,11 +403,12 @@ _bindEventHandlers = (ev, handler) ->
 					_bindEventHandler.call @, evId, fn
 			else
 				_bindEventHandler.call @, evId, cb
+	@
 _bindEventHandler = (ev, handler) ->
 	# Validate arguments
 	ev = 'change' unless ev
 	if ev.indexOf('change') < 0
-		throw new Error 'StoreClass on: StoreClass currently only handles "change" events!'
+		throw new Error 'StoreClass on(): StoreClass currently only handles "change" events!'
 	# Init @_eventHandlers
 	@_eventHandlers = {} unless @_eventHandlers
 	# Prepare event id
@@ -419,9 +420,61 @@ _bindEventHandler = (ev, handler) ->
 	# Register handlers to the list @_eventHandlers
 	@_eventHandlers[evId] = [] unless @_eventHandlers[evId]
 	if @_eventHandlers[evId].indexOf(handler) >= 0
-		console.warn 'StoreClass on: handler for event ' + ev + ' already bound!'
+		console.warn 'StoreClass on(): handler for event ' + ev + ' already bound!'
 	else
 		@_eventHandlers[evId].push handler
+	@
+_unbindEventHandlers = (ev, handler) ->
+	if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Array]')
+		for cb in handler
+			if typeof cb isnt 'function'
+				throw new Error 'StoreClass off(): handlers list for ' + ev + ' may only contain functions!'
+			_unbindEventHandler.call @, ev, cb
+	else if (typeof ev is 'string')
+		if (typeof handler isnt 'undefined') and (typeof handler isnt 'function')
+			throw new Error 'StoreClass off(): handler parameter must be a function!'
+		_unbindEventHandler.call @, ev, handler
+	else if Object::toString.call(ev) is '[object Object]'
+		for evId, cb of ev
+			if Object::toString.call(cb) is '[object Array]'
+				for fn in cb
+					if typeof fn isnt 'function'
+						throw new Error 'StoreClass off(): handlers list for ' + ev + ' may only contain functions!'
+					_unbindEventHandler.call @, evId, fn
+			else
+				if typeof cb isnt 'function'
+					throw new Error 'StoreClass off(): value in property ' + evId + ' must be a function!'
+				_unbindEventHandler.call @, evId, cb
+	else if typeof ev is 'undefined'
+		for key of @_eventHandlers
+			if !@_eventHandlers.hasOwnProperty key
+				continue
+			delete @_eventHandlers[key]
+	else
+		throw new Error 'StoreClass off(): invalid parameters!'
+	@
+_unbindEventHandler = (ev, handler) ->
+	# Prepare event id
+	evArr = ev.split ':'
+	evId = ''
+	for str in evArr
+		evId += str if str isnt 'change'
+	evId = '**' if evId is ''
+	# Check to see handler exists
+	if typeof @_eventHandlers[evId] is 'undefined'
+		console.warn 'StoreClass off(): no handlers registered to the event ' + ev + '!'
+		return
+	# Remove handler from @_eventHandlers
+	if typeof handler is 'undefined'
+		@_eventHandlers[evId].length = 0
+	else if @_eventHandlers[evId].indexOf(handler) >= 0
+		@_eventHandlers[evId].splice @_eventHandlers[evId].indexOf(handler), 1
+	else
+		console.warn 'StoreClass off(): handler passed in not registered to event ' + ev
+	# Cleanup
+	if @_eventHandlers[evId].length is 0
+		delete @_eventHandlers[evId]
+	@
 
 # Dispatch Event Handlers
 _dispatchHandler = (payload)->
@@ -530,9 +583,5 @@ module.exports = StoreClass = class StoreClass
 		# (easier argument ordering - key can be optional in this instance)
 	on: (args...) ->
 		_bindEventHandlers.apply @, args
-	off: (ev, handler) ->
-		# TODO:
-		# Unbind handlers from events
-		# events: change
-		# Allow to unbind a change listener from a specific property
-		# If handler isn't passed in unregister all handlers from event
+	off: (args...) ->
+		_unbindEventHandlers.apply @, args
