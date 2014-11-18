@@ -8,17 +8,18 @@ changeHandler2 = (val) ->
 module.exports = StoreInstance = new StoreClass
 	dispatcher: require 'dispatcher'
 	actions:
-		action1: "callback1"
+		action1: ["callback1", "callback4"]
 		action2: ["callback2", "callback3"]
 	callbacks:
 		callback1: ->
-			console.log 'callback1'
-		callback2: ->
-			console.log 'callback2'
+			console.log 'callback1', arguments
+		callback2: (v)->
+			console.log 'callback2', arguments
+			@value = v
 		callback3: ->
-			console.log 'callback3'
+			console.log 'callback3', arguments
 		callback4: ->
-			console.log 'callback 4'
+			console.log 'callback 4', arguments
 	initial:
 		key1: 'value1'
 		key2: 2
@@ -32,14 +33,16 @@ module.exports = StoreInstance = new StoreClass
 StoreInstance.ch1 = changeHandler1
 StoreInstance.ch2 = changeHandler2
 
+StoreInstance.on 'change:key4', changeHandler2
+
 StoreInstance.registerCallback 'callback1', ->
-	console.log 'callback1 override'
+	console.log 'callback1 override', arguments
 
 # StoreInstance.on('change', changeHandler1)
 # StoreInstance.on('change:key1', [changeHandler1, changeHandler2])
 
 StoreInstance.Dispatcher.dispatch
-	actionId: 'action1'
+	actionId: 'action2'
 	value:
 		key1: 'value1'
 		key2: 2

@@ -389,7 +389,7 @@ _syncValues = ->
 	@_addToHistory.call(@, @_value) if @_value
 	@_value = clone(@value)
 
-# Event handler registration/unregistration
+# Event Handler Registration/Unregistration
 _bindEventHandlers = (ev, handler) ->
 	_validateBindHandlers 'on', ev, handler
 	if (typeof ev is 'string') and (typeof handler is 'function')
@@ -489,29 +489,25 @@ _dispatchHandler = (payload)->
 	if (typeof payload.value isnt 'object') and (Object::toString.call(payload.value) isnt '[object Object]')
 		console.warn 'StoreClass _dispatchHandler expects an object value in the payload! Aborting...'
 		return
-
+	# Fire all registered callbacks for the actionId
 	{ actionId, value } = payload
+	for action, callbacks of @_actions
+		continue if action isnt actionId
+		for callback in callbacks
+			@_callbacks[callback].call(@, value) if typeof @_callbacks[callback] is 'function'
+	# If @value has changed, update @_history and @_value and emit the changes
+	diff = _diffObjects @value, @_value
+	_emitChanges.call(@, diff) if diff.length > 0
 
-	console.log '_dispatchHandler', actionId, value
-	console.log '_dispatchHandler', @_actions
-	# for action, callbacks of @_actions
-	# 	#...
-	# TODO:
-	# check against internal _actions and _callbacks to find correct callback
-	# Invoke associated callbacks, passing the context
-	#
-	# Expect callback to affect @value
-	# When callback is complete, diff @value against @_value
-	# If there are changes, emit the changes to all registered change handlers
-	# TODO: store must check against each diff returned to see if the chain exists in the full chain string
-
+# Emit Changes
 # TODO:
 # Emit changes just cycles through store callbacks and fires them off
-# No need for an emitter utility/instance
-_emitChanges = ->
+_emitChanges = (changedArray) ->
+	console.log '_emitChanges', changedArray
 	# TODO:
+	# TODO: store must check against each diff returned to see if the chain exists in the full chain string
 	# Emit all changes to internal value
-_emitChange = (ev, val) ->
+_emitChange = (handler, val) ->
 	# TODO:
 	# Fire emitter with event and value
 
