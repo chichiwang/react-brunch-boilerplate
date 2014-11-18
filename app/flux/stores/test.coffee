@@ -38,4 +38,14 @@ StoreInstance.registerCallback 'callback1', ->
 # StoreInstance.on('change', changeHandler1)
 # StoreInstance.on('change:key1', [changeHandler1, changeHandler2])
 
+StoreInstance.Dispatcher.dispatch
+	actionId: 'action1'
+	value:
+		key1: 'value1'
+		key2: 2
+		key3: ['key', '3']
+		key4:
+			foo: 'bar'
+			bar: 'baz'
+
 console.log StoreInstance

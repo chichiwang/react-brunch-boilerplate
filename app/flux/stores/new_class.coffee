@@ -182,8 +182,9 @@ _init = (options)->
 		@on(options.events) if options.events
 
 		@Dispatcher = options.dispatcher
-		# TODO: Initialize dispatch handler and callback management
-		@Dispatcher.register @_callDispatchHandler
+		self = @
+		@_dispatcherToken = @Dispatcher.register (args...) ->
+			_dispatchHandler.apply self, args
 
 # Validation Methods
 _validate = (options) ->
@@ -476,7 +477,7 @@ _unbindEventHandler = (ev, handler) ->
 		delete @_eventHandlers[evId]
 	@
 
-# Dispatch Event Handlers
+# Dispatch-Event Handlers
 _dispatchHandler = (payload)->
 	# Validate payload
 	if Object::toString.call(payload) isnt '[object Object]'
@@ -489,6 +490,10 @@ _dispatchHandler = (payload)->
 		console.warn 'StoreClass _dispatchHandler expects an object value in the payload! Aborting...'
 		return
 
+	{ actionId, value } = payload
+
+	console.log '_dispatchHandler', actionId, value
+	console.log '_dispatchHandler', @_actions
 	# for action, callbacks of @_actions
 	# 	#...
 	# TODO:
@@ -544,11 +549,10 @@ module.exports = StoreClass = class StoreClass
 	_eventHandlers: undefined # object map of events to handlers
 
 	Dispatcher: undefined
+	_dispatcherToken: undefined
 
 	constructor: (options = {}) ->
 		_init.call @, options
-	_callDispatchHandler: (args...)->
-		_dispatchHandler.apply @, args
 
 	# Public Registration Methods
 	registerActions: (args...) ->
