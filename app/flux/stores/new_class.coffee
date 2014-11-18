@@ -486,7 +486,7 @@ _dispatchHandler = (payload)->
 	if typeof payload.actionId isnt 'string'
 		console.warn 'StoreClass _dispatchHandler expects a string actionId in the payload! Aborting...'
 		return
-	if (typeof payload.value isnt 'object') and (Object::toString.call(payload.value) isnt '[object Object]')
+	if Object::toString.call(payload.value) isnt '[object Object]'
 		console.warn 'StoreClass _dispatchHandler expects an object value in the payload! Aborting...'
 		return
 	# Fire all registered callbacks for the actionId
@@ -515,6 +515,29 @@ _emitChanges = (changedArray) ->
 					handler(value)
 					handled.push handler
 
+# Static Getter Methods
+_get = (key, numPrev) ->
+	if typeof numPrev is 'number'
+		if numPrev > 5
+			throw new Error 'StoreClass get: store only tracks previous 5 values!'
+		return undefined if @_history.length < numPrev
+		value = clone @_history[numPrev - 1]
+	else
+		value = clone @value
+
+	if not key
+		return value
+	else if typeof key is 'string'
+		keyChain = key.split '.'
+		for k in keyChain
+			if Object::toString.call(value) isnt '[object Object]'
+				console.warn 'Current store value: ', @value
+				throw new Error 'StoreClass get: cannot find key "' + key + '" in current store value!'
+			value = value[k]
+		return value
+	else
+		throw new Error 'StoreClass get: key passed in must be a string, null, or undefined!'
+
 # StoreClass
 # Class Constructor
 # options =
@@ -535,15 +558,16 @@ module.exports = StoreClass = class StoreClass
 	#  .. Create a global list of groups that all store instances can access
 	#  .. Group will allow you to listen into an entire group of stores for changes
 
-	# TODO: Enforce _value/value must be an object [object Object]
+	# TODO:
+	# Allow user to set upper bound of history array in options
+	# Change upper bound in get() and _addToHistory()
+
 	_history: undefined # list of up to 5 previous store values
 	_value: undefined # private internal value to diff changes against and push into the history array
 	value: undefined # value is mutable by callback functions, then checked against internal _value
 	
 	_actions: undefined # object map of actions to methods
 	_callbacks: undefined # list of callbacks
-	# Remove this: use .hasOwnProperty on _actions instead
-	_actionKeys: undefined # array of action names, used as convenience by _dispatchHandler
 
 	_eventHandlers: undefined # object map of events to handlers
 
@@ -573,12 +597,8 @@ module.exports = StoreClass = class StoreClass
 		_unregisterCallback.apply @, args
 
 	# Get Value, Bind and Unbind Change Methods
-	get: (key, numPrev) ->
-		# TODO:
-		# Retrieve value if no key (undefined)
-		# Parse key, return key value
-		# Allow nested keys
-		# numPrev is optional and will indicate how far back in history to retrieve the key
+	get: (args...) ->
+		_get.apply @, args
 	getPrev: (numPrev, key) ->
 		# TODO:
 		# Call @get(key, numPrev)
