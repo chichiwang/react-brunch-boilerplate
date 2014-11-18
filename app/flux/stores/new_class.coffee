@@ -553,12 +553,6 @@ _get = (key, numPrev) ->
 #		key2: val2
 module.exports = StoreClass = class StoreClass
 	# TODO:
-	# Add the ability to add a store to a group
-	#  .. Create the group if the group does not already exist
-	#  .. Create a global list of groups that all store instances can access
-	#  .. Group will allow you to listen into an entire group of stores for changes
-
-	# TODO:
 	# Allow user to set upper bound of history array in options
 	# Change upper bound in get() and _addToHistory()
 
@@ -610,3 +604,13 @@ module.exports = StoreClass = class StoreClass
 		# TODO:
 		# Unregister from Dispatcher using @_dispatcherToken
 		# Recurse through all self properties, set to null, delete
+
+# TODO:
+# Add the ability to add a store to a group
+#  .. Create the group if the group does not already exist
+#  .. Create a global list of groups that all store instances can access
+#  .. Group will allow you to listen into an entire group of stores for changes
+#  ..
+#  .. New class (check against global object: Arc.StoreGroups[group_name])
+#  .. Group functionality can be executed through StoreClass through a reference @group
+#  .. No direct handling of groups except through stores and the global object
