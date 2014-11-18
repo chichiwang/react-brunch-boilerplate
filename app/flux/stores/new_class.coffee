@@ -600,10 +600,7 @@ module.exports = StoreClass = class StoreClass
 	get: (args...) ->
 		_get.apply @, args
 	getPrev: (numPrev, key) ->
-		# TODO:
-		# Call @get(key, numPrev)
-		# Convenience method when retrieving previous values
-		# (easier argument ordering - key can be optional in this instance)
+		_get.call @, key, numPrev
 	on: (args...) ->
 		_bindEventHandlers.apply @, args
 	off: (args...) ->
