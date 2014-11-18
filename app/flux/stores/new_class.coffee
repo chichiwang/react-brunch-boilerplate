@@ -386,8 +386,8 @@ _addToHistory = (val) ->
 	if @_history.unshift(val) > 5
 		@_history.length = 5
 _syncValues = ->
-	@_addToHistory.call(@, @_value) if @_value
-	@_value = clone(@value)
+	_addToHistory.call(@, @_value) if @_value
+	@_value = clone @value
 
 # Event Handler Registration/Unregistration
 _bindEventHandlers = (ev, handler) ->
@@ -497,19 +497,23 @@ _dispatchHandler = (payload)->
 			@_callbacks[callback].call(@, value) if typeof @_callbacks[callback] is 'function'
 	# If @value has changed, update @_history and @_value and emit the changes
 	diff = _diffObjects @value, @_value
-	_emitChanges.call(@, diff) if diff.length > 0
+	if diff.length > 0
+		_syncValues.call @
+		_emitChanges.call @, diff
 
 # Emit Changes
-# TODO:
-# Emit changes just cycles through store callbacks and fires them off
 _emitChanges = (changedArray) ->
-	console.log '_emitChanges', changedArray
-	# TODO:
-	# TODO: store must check against each diff returned to see if the chain exists in the full chain string
-	# Emit all changes to internal value
-_emitChange = (handler, val) ->
-	# TODO:
-	# Fire emitter with event and value
+	value = clone @value
+	emitted = []
+	handled = []
+	for change in changedArray
+		for ev, handlers of @_eventHandlers
+			if (change.indexOf(ev) >= 0 or ev is '**') and not (ev in emitted)
+				emitted.push ev
+				for handler in handlers
+					continue if handler in handled
+					handler(value)
+					handled.push handler
 
 # StoreClass
 # Class Constructor
@@ -526,7 +530,6 @@ _emitChange = (handler, val) ->
 #		key2: val2
 module.exports = StoreClass = class StoreClass
 	# TODO:
-	# Add a history of up to 5 previous values of _value
 	# Add the ability to add a store to a group
 	#  .. Create the group if the group does not already exist
 	#  .. Create a global list of groups that all store instances can access
@@ -585,3 +588,8 @@ module.exports = StoreClass = class StoreClass
 		_bindEventHandlers.apply @, args
 	off: (args...) ->
 		_unbindEventHandlers.apply @, args
+
+	dispose: ->
+		# TODO:
+		# Unregister from Dispatcher using @_dispatcherToken
+		# Recurse through all self properties, set to null, delete
