@@ -538,6 +538,19 @@ _get = (key, numPrev) ->
 	else
 		throw new Error 'StoreClass get: key passed in must be a string, null, or undefined!'
 
+
+# TODO:
+# Create a new store helper: Arc.StoreGroup
+# Create store group, add stores, etc.
+# Add the ability to add a store to a group
+#  .. Create the group if the group does not already exist
+#  .. Create a global list of groups that all store instances can access
+#  .. Group will allow you to listen into an entire group of stores for changes
+#  ..
+#  .. New class (check against global object: Arc.StoreGroups[group_name])
+#  .. Group functionality can be executed through StoreClass through a reference @group
+#  .. No direct handling of groups except through stores and the global object
+
 # StoreClass
 # Class Constructor
 # options =
@@ -555,6 +568,8 @@ module.exports = StoreClass = class StoreClass
 	# TODO:
 	# Allow user to set upper bound of history array in options
 	# Change upper bound in get() and _addToHistory()
+	# ..
+	# New events in addition to "change": on, off
 
 	_history: undefined # list of up to 5 previous store values
 	_value: undefined # private internal value to diff changes against and push into the history array
@@ -604,13 +619,3 @@ module.exports = StoreClass = class StoreClass
 		# TODO:
 		# Unregister from Dispatcher using @_dispatcherToken
 		# Recurse through all self properties, set to null, delete
-
-# TODO:
-# Add the ability to add a store to a group
-#  .. Create the group if the group does not already exist
-#  .. Create a global list of groups that all store instances can access
-#  .. Group will allow you to listen into an entire group of stores for changes
-#  ..
-#  .. New class (check against global object: Arc.StoreGroups[group_name])
-#  .. Group functionality can be executed through StoreClass through a reference @group
-#  .. No direct handling of groups except through stores and the global object
