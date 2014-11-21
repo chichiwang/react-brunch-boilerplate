@@ -173,6 +173,8 @@ _init = (options)->
 		_validate options
 		# Init values
 		@_history = [] unless @_history
+		if typeof options.maxHistory is 'number'
+			@maxHistory = options.maxHistory
 		if typeof options.initial isnt 'undefined'
 			@value = options.initial
 			_syncValues.call @
@@ -196,6 +198,8 @@ _validate = (options) ->
 		throw new Error "StoreClass _validate: initial property of options passed to constructor must be an object!"
 	if (typeof options.events isnt 'undefined') and (Object::toString.call(options.events) isnt '[object Object]')
 		throw new Error "StoreClass _validate: events property of options passed to constructor must be an object!"
+	if (typeof options.maxHistory isnt 'undefined') and (typeof options.maxHistory isnt 'number')
+		throw new Error "StoreClass _validate: maxHistory property must be an integer!"
 	# TODO: Validate options.dispatcher has a method .register(value)
 _validateActions = (fnName, actionsMap) ->
 	# Validate actionsMap is an object
@@ -383,8 +387,8 @@ _unregisterCallback = (callback) ->
 
 # Value helper methods
 _addToHistory = (val) ->
-	if @_history.unshift(val) > 5
-		@_history.length = 5
+	if @_history.unshift(val) > @maxHistory
+		@_history.length = @maxHistory
 _syncValues = ->
 	_addToHistory.call(@, @_value) if @_value
 	@_value = clone @value
@@ -518,8 +522,8 @@ _emitChanges = (changedArray) ->
 # Static Getter Methods
 _get = (key, numPrev) ->
 	if typeof numPrev is 'number'
-		if numPrev > 5
-			throw new Error 'StoreClass get: store only tracks previous 5 values!'
+		if numPrev > @maxHistory
+			throw new Error 'StoreClass get: store only tracks previous ' + @maxHistory + ' values!'
 		return undefined if @_history.length < numPrev
 		value = clone @_history[numPrev - 1]
 	else
@@ -566,12 +570,10 @@ _get = (key, numPrev) ->
 #		key2: val2
 module.exports = StoreClass = class StoreClass
 	# TODO:
-	# Allow user to set upper bound of history array in options
-	# Change upper bound in get() and _addToHistory()
-	# ..
 	# New events in addition to "change": on, off
 
-	_history: undefined # list of up to 5 previous store values
+	maxHistory: 5
+	_history: undefined # list of up to @maxHistory previous store values
 	_value: undefined # private internal value to diff changes against and push into the history array
 	value: undefined # value is mutable by callback functions, then checked against internal _value
 	
