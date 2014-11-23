@@ -442,7 +442,7 @@ _bindEventHandlers = (ev, handler, context) ->
 			_bindEventHandler.call @, ev, handler
 	else if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Array]')
 		for cb in handler
-			_bindEventHandler.call @, ev, cb
+			_bindEventHandler.call @, ev, cb, context
 	else
 		for evId, cb of ev
 			if Object::toString.call(cb) is '[object Array]'

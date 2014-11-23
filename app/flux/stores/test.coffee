@@ -50,7 +50,7 @@ module.exports = StoreInstance = new StoreClass
 StoreInstance.ch1 = changeHandler1
 StoreInstance.ch2 = changeHandler2
 
-StoreInstance.on 'change:key4', changeHandler4, { ctx: 'test context +4' }
+StoreInstance.on 'change:key4', [changeHandler0, changeHandler4], { ctx: 'test context +4' }
 
 StoreInstance.registerCallback 'callback1', ->
 	console.log 'callback1 override', arguments, @
