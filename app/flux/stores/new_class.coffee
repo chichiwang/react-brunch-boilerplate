@@ -616,11 +616,8 @@ _get = (key, numPrev) ->
 # Class Constructor
 # options =
 # 	actions:
-# 		"action1": "function1"
-# 		"action2": "function2"
-# 	callbacks:
-# 		"function1": Fn()
-# 		"function2": Fn()
+# 		"action1": function1()
+# 		"action2": [function2(), function3()]
 # 	dispatcher: Dispatcher Instance
 #	events:
 #		'change': changeHandler()
@@ -631,6 +628,10 @@ _get = (key, numPrev) ->
 #		key1: val1
 #		key2: val2
 module.exports = StoreClass = class StoreClass
+
+	# TODO:
+	# Rework actions and callbacks to simplify API to only manage actions
+
 	maxHistory: 5
 	_history: undefined # list of up to @maxHistory previous store values
 	_value: undefined # private internal value to diff changes against and push into the history array
