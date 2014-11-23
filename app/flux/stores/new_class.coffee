@@ -234,7 +234,7 @@ _validateBindHandlers = (fnName, ev, handler) ->
 		throw new Error 'StoreClass ' + fnName + '(): arguments passed in must be either (event, handler) or (eventsMap)!'
 	if (typeof ev is 'string') and ((typeof handler isnt 'function') and (Object::toString.call(handler) isnt '[object Array]') and (Object::toString.call(handler) isnt '[object Object]'))
 		throw new Error 'StoreClass ' + fnName + '(): second argument must be a function, array of functions, or options object!'
-	# options object passed in
+	# options passed in with event string
 	if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Object]')
 		if (Object::toString.call(handler.context) isnt '[object Object]') or ((typeof handler.handlers isnt 'function') and (Object::toString.call(handler.handlers) isnt '[object Array]'))
 			throw new Error 'StoreClass ' + fnName + '(): invalid options object passed in!'
