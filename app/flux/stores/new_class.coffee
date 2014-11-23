@@ -570,7 +570,7 @@ _get = (key, numPrev) ->
 #		key2: val2
 module.exports = StoreClass = class StoreClass
 	# TODO:
-	# Allow context to be passed in along with change handlers
+	# Allow context to be passed in along with event handlers
 	maxHistory: 5
 	_history: undefined # list of up to @maxHistory previous store values
 	_value: undefined # private internal value to diff changes against and push into the history array

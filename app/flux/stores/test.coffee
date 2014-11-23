@@ -32,12 +32,17 @@ module.exports = StoreInstance = new StoreClass
 			foo: 'bar'
 	events:
 		'change': changeHandler1,
-		'change:key1': [changeHandler2, changeHandler3]
+		'change:key1':
+			context: { ctx: 'test context 1' }
+			handlers: [changeHandler2, changeHandler3]
+		'change:key4':
+			context: { ctx: 'test context 2' }
+			handlers: changeHandler4
 
 StoreInstance.ch1 = changeHandler1
 StoreInstance.ch2 = changeHandler2
 
-StoreInstance.on 'change:key4', [changeHandler1, changeHandler4]
+StoreInstance.on 'change:key4', changeHandler1
 
 StoreInstance.registerCallback 'callback1', ->
 	console.log 'callback1 override', arguments, @
