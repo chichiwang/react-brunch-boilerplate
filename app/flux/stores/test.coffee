@@ -1,5 +1,7 @@
 StoreClass = require './new_class'
 
+changeHandler0 = (val) ->
+	console.log 'changeHandler0: ', val, @
 changeHandler1 = (val) ->
 	console.log 'changeHandler1: ', val, @
 changeHandler2 = (val) ->
@@ -31,12 +33,18 @@ module.exports = StoreInstance = new StoreClass
 		key4:
 			foo: 'bar'
 	events:
-		'change': changeHandler1,
+		'change': changeHandler0,
 		'change:key1':
 			context: { ctx: 'test context 1' }
-			handlers: [changeHandler2, changeHandler3]
+			handlers: [changeHandler0, changeHandler1]
+		'change:key2': [{
+			context: { ctx: 'test context 2' },
+			handlers: changeHandler2
+		},
+		changeHandler2
+		]
 		'change:key4':
-			context: { ctx: 'test context 2' }
+			context: { ctx: 'test context 3' }
 			handlers: changeHandler4
 
 StoreInstance.ch1 = changeHandler1

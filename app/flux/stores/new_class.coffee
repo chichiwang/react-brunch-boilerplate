@@ -232,20 +232,44 @@ _validateCallbacks = (fnName, callbacksMap) ->
 _validateBindHandlers = (fnName, ev, handler) ->
 	if (typeof ev isnt 'string') and (Object::toString.call(ev) isnt '[object Object]')
 		throw new Error 'StoreClass ' + fnName + '(): arguments passed in must be either (event, handler) or (eventsMap)!'
-	if (typeof ev is 'string') and (typeof handler isnt 'function' and Object::toString.call(handler) isnt '[object Array]')
+	if (typeof ev is 'string') and ((typeof handler isnt 'function') and (Object::toString.call(handler) isnt '[object Array]'))
 		throw new Error 'StoreClass ' + fnName + '(): second argument must be a function or array of functions!'
+	# array of handlers passed in
 	if Object::toString.call(handler) is '[object Array]'
 		for cb in handler
 			if typeof cb isnt 'function'
 				throw new Error 'StoreClass ' + fnName + '(): element in handler array is not a function!'
+	# options object passed in - ignore handler parameter
 	else if Object::toString.call(ev) is '[object Object]'
 		for evId, cb of ev
-			if (typeof cb isnt 'function') and (Object::toString.call(cb) isnt '[object Array]')
+			# callback is an options object
+			if Object::toString.call(cb) is '[object Object]'
+				# options object is invalid
+				if (Object::toString.call(cb.context) isnt '[object Object]') and ((typeof cb.handlers isnt 'function') or (Object::toString.call(cb.handlers) isnt '[object Array]'))
+					throw new Error 'StoreClass ' + fnName + '(): invalid options object!'
+				# validate options array
+				else if Object::toString.call(cb.handlers) is '[object Array]'
+					for fn in cb.handlers
+						if typeof fn isnt 'function'
+							throw new Error 'StoreClass ' + fnName + '(): all handlers must be functions!'
+			# callback isnt function, options object, or array of functions/options objects
+			else if (typeof cb isnt 'function') and (Object::toString.call(cb) isnt '[object Array]')
 				throw new Error 'StoreClass ' + fnName + '(): events map properties must contain event callback functions!'
-			if Object::toString.call(cb) is '[object Array]'
-				for fn in cb
-					if typeof fn isnt 'function'
-						throw new Error 'StoreClass ' + fnName + '(): events map properties must contain event callback functions!'
+			# callback is an array
+			else if Object::toString.call(cb) is '[object Array]'
+				for obj in cb
+					# array element is neither function nor object
+					if (typeof obj isnt 'function') and (Object::toString.call(obj) isnt '[object Object]')
+						throw new Error 'StoreClass ' + fnName + '(): events map properties must contain event callback functions or options!'
+					# validate options object in array
+					else if Object::toString.call(obj) is '[object Object]'
+						if (Object::toString.call(obj.context) isnt '[object Object]') and ((typeof obj.handlers isnt 'function') or (Object::toString.call(obj.handlers) isnt '[object Array]'))
+							throw new Error 'StoreClass ' + fnName + '(): invalid options object!'
+						# validate handlers in options object in array
+						else if Object::toString.call(obj.handlers) is '[object Array]'
+							for fn in obj.handlers
+								if typeof fn isnt 'function'
+									throw new Error 'StoreClass ' + fnName + '(): all handlers must be functions!'
 
 # Registration/Unregistration Helpers
 _removeCallbackFromAction = (actionId, callbackId) ->
