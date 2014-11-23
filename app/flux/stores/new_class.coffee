@@ -232,13 +232,28 @@ _validateCallbacks = (fnName, callbacksMap) ->
 _validateBindHandlers = (fnName, ev, handler) ->
 	if (typeof ev isnt 'string') and (Object::toString.call(ev) isnt '[object Object]')
 		throw new Error 'StoreClass ' + fnName + '(): arguments passed in must be either (event, handler) or (eventsMap)!'
-	if (typeof ev is 'string') and ((typeof handler isnt 'function') and (Object::toString.call(handler) isnt '[object Array]'))
-		throw new Error 'StoreClass ' + fnName + '(): second argument must be a function or array of functions!'
+	if (typeof ev is 'string') and ((typeof handler isnt 'function') and (Object::toString.call(handler) isnt '[object Array]') and (Object::toString.call(handler) isnt '[object Object]'))
+		throw new Error 'StoreClass ' + fnName + '(): second argument must be a function, array of functions, or options object!'
+	# options object passed in
+	if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Object]')
+		if (Object::toString.call(handler.context) isnt '[object Object]') or ((typeof handler.handlers isnt 'function') and (Object::toString.call(handler.handlers) isnt '[object Array]'))
+			throw new Error 'StoreClass ' + fnName + '(): invalid options object passed in!'
+		else if Object::toString.call(handler.handlers) is '[object Array]'
+			for hl in handler.handlers
+				if typeof hl isnt 'function'
+					throw new Error 'StoreClass ' + fnName + '(): invalid options object passed in!'
 	# array of handlers passed in
 	if Object::toString.call(handler) is '[object Array]'
 		for cb in handler
-			if typeof cb isnt 'function'
-				throw new Error 'StoreClass ' + fnName + '(): element in handler array is not a function!'
+			if (typeof cb isnt 'function') and (Object::toString.call(cb) isnt '[object Object]')
+				throw new Error 'StoreClass ' + fnName + '(): element in handler array is not a function or options object!'
+			else if Object::toString.call(cb) is '[object Object]'
+				if (Object::toString.call(cb.context) isnt '[object Object]') or ((typeof cb.handlers isnt 'function') and (Object::toString.call(cb.handlers) isnt '[object Array]'))
+					throw new Error 'StoreClass ' + fnName + '(): invalid options object passed in!'
+				else if Object::toString.call(cb.handlers) is '[object Array]'
+					for hl in cb.handlers
+						if typeof hl isnt 'function'
+							throw new Error 'StoreClass ' + fnName + '(): invalid options object passed in!'
 	# options object passed in - ignore handler parameter
 	else if Object::toString.call(ev) is '[object Object]'
 		for evId, cb of ev
@@ -420,7 +435,7 @@ _syncValues = ->
 # Event Handler Registration/Unregistration
 _bindEventHandlers = (ev, handler) ->
 	_validateBindHandlers 'on', ev, handler
-	if (typeof ev is 'string') and (typeof handler is 'function')
+	if (typeof ev is 'string') and ((typeof handler is 'function') or (Object::toString.call(handler) is '[object Object]'))
 		_bindEventHandler.call @, ev, handler
 	else if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Array]')
 		for cb in handler
@@ -437,6 +452,7 @@ _bindEventHandler = (ev, handler) ->
 	# Validate arguments
 	ev = 'change' unless ev
 	if ev.indexOf('change') < 0
+		console.warn 'StoreClass on(): ', @_eventHandlers
 		throw new Error 'StoreClass on(): StoreClass currently only handles "change" events!'
 	# Init @_eventHandlers
 	@_eventHandlers = {} unless @_eventHandlers
@@ -460,8 +476,8 @@ _unbindEventHandlers = (ev, handler) ->
 				throw new Error 'StoreClass off(): handlers list for ' + ev + ' may only contain functions!'
 			_unbindEventHandler.call @, ev, cb
 	else if (typeof ev is 'string')
-		if (typeof handler isnt 'undefined') and (typeof handler isnt 'function')
-			throw new Error 'StoreClass off(): handler parameter must be a function!'
+		if (typeof handler isnt 'undefined') and (typeof handler isnt 'function') and (Object::toString.call(handler) isnt '[object Object]')
+			throw new Error 'StoreClass off(): handler parameter must be a function or options object!'
 		_unbindEventHandler.call @, ev, handler
 	else if Object::toString.call(ev) is '[object Object]'
 		for evId, cb of ev
@@ -540,8 +556,18 @@ _emitChanges = (changedArray) ->
 				emitted.push ev
 				for handler in handlers
 					continue if handler in handled
-					handler(value)
-					handled.push handler
+					if Object::toString.call(handler) is '[object Object]'
+						ctx = handler.context
+						hl = handler.handlers
+						if typeof hl is 'function'
+							hl.call ctx, value
+						else
+							for h in hl
+								h.call ctx, value
+						handled.push handler
+					else
+						handler(value)
+						handled.push handler
 
 # Static Getter Methods
 _get = (key, numPrev) ->
@@ -589,12 +615,15 @@ _get = (key, numPrev) ->
 # 		"function1": Fn()
 # 		"function2": Fn()
 # 	dispatcher: Dispatcher Instance
+#	events:
+#		'change': changeHandler()
+#		'change:key1':
+#			context: this
+#			handlers: [key1handler1(), key1handler2()]
 #	initial:
 #		key1: val1
 #		key2: val2
 module.exports = StoreClass = class StoreClass
-	# TODO:
-	# Allow context to be passed in along with event handlers
 	maxHistory: 5
 	_history: undefined # list of up to @maxHistory previous store values
 	_value: undefined # private internal value to diff changes against and push into the history array
