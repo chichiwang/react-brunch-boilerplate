@@ -24,7 +24,7 @@ catch
 		# Native/Custom Clone Methods
 		return obj.clone(true) if typeof obj.clone is 'function'
 		# Array Object
-		if Object::toString.call(obj) is '[object Array]'
+		if toString(obj) is '[object Array]'
 			result = obj.slice()
 			for el, idx in result
 				result[idx] = clone el, _copied
@@ -52,13 +52,16 @@ catch
 			result[key] = clone val, _copied
 		return result
 
+toString = (obj) ->
+	Object::toString.call(obj)
+
 # Deep diff two objects
 # Return the keys diff between obj1 and obj2
 # Borrowed heavily from http://stackoverflow.com/a/1144249/1161897
 _diffObjects = (obj1, obj2) ->
 	allArgsAreObjects = true
 	for arg in arguments
-		if Object::toString.call(arg) isnt '[object Object]'
+		if toString(arg) isnt '[object Object]'
 			allArgsAreObjects = false
 	if (not allArgsAreObjects) or (arguments.length isnt 2)
 		throw new Error 'StoreClass _diffObjects: must be passed 2 objects to diff'
@@ -106,7 +109,7 @@ _diffObjects = (obj1, obj2) ->
 		bothStrs = x instanceof String and y instanceof String
 		bothNums = x instanceof Number and y instanceof Number
 		if bothFns or bothDates or bothRegExp or bothStrs or bothNums
-			if Object::toString.call(x) isnt Object::toString.call(y)
+			if toString(x) isnt toString(y)
 				addToKeysChanged()
 				return false
 			else
@@ -185,87 +188,87 @@ _init = (options)->
 
 # Validation Methods
 _validate = (options) ->
-	if Object::toString.call(options) isnt '[object Object]'
+	if toString(options) isnt '[object Object]'
 		throw new Error "StoreClass _validate: options passed to constructor must be an object!"
 	if typeof options.dispatcher isnt 'object'
 		throw new Error "StoreClass _validate: constructor must be passed a dispatcher instance!"
-	if (typeof options.initial isnt 'undefined') and (Object::toString.call(options.initial) isnt '[object Object]')
+	if (typeof options.initial isnt 'undefined') and (toString(options.initial) isnt '[object Object]')
 		throw new Error "StoreClass _validate: initial property of options passed to constructor must be an object!"
-	if (typeof options.events isnt 'undefined') and (Object::toString.call(options.events) isnt '[object Object]')
+	if (typeof options.events isnt 'undefined') and (toString(options.events) isnt '[object Object]')
 		throw new Error "StoreClass _validate: events property of options passed to constructor must be an object!"
 	if (typeof options.maxHistory isnt 'undefined') and (typeof options.maxHistory isnt 'number')
 		throw new Error "StoreClass _validate: maxHistory property must be an integer!"
 	# TODO: Validate options.dispatcher has a method .register(value)
 _validateActions = (fnName, actionsMap) ->
 	# Validate actionsMap is an object
-	isObject = Object::toString.call(actionsMap) is '[object Object]'
+	isObject = toString(actionsMap) is '[object Object]'
 	isNull = actionsMap is null
-	if (not isObject) or (Object::toString.call(actionsMap) is '[object Array]') or isNull
+	if (not isObject) or (toString(actionsMap) is '[object Array]') or isNull
 		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
 	# Validate actionsMap properties
 	for key, val of actionsMap
 		if actionsMap.hasOwnProperty? and not actionsMap.hasOwnProperty key
 			continue
 		# Validate actionObj key/value pairs
-		if (typeof val isnt 'function') and (typeof val isnt 'undefined') and (Object::toString.call(val) isnt '[object Array]')
+		if (typeof val isnt 'function') and (typeof val isnt 'undefined') and (toString(val) isnt '[object Array]')
 			throw new Error 'StoreClass registerActions: property ' + key + ' must contain a function or array of functions!'
-		else if (Object::toString.call(val) is '[object Array]')
+		else if (toString(val) is '[object Array]')
 			for element in val
 				if typeof element isnt 'function'
 					throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of functions!'
 _validateBindHandlers = (fnName, ev, handler) ->
-	if (typeof ev isnt 'string') and (Object::toString.call(ev) isnt '[object Object]')
+	if (typeof ev isnt 'string') and (toString(ev) isnt '[object Object]')
 		throw new Error 'StoreClass ' + fnName + '(): arguments passed in must be either (event, handler) or (eventsMap)!'
-	if (typeof ev is 'string') and ((typeof handler isnt 'function') and (Object::toString.call(handler) isnt '[object Array]') and (Object::toString.call(handler) isnt '[object Object]'))
+	if (typeof ev is 'string') and ((typeof handler isnt 'function') and (toString(handler) isnt '[object Array]') and (toString(handler) isnt '[object Object]'))
 		throw new Error 'StoreClass ' + fnName + '(): second argument must be a function, array of functions, or options object!'
 	# options passed in with event string
-	if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Object]')
-		if (Object::toString.call(handler.context) isnt '[object Object]') or ((typeof handler.handlers isnt 'function') and (Object::toString.call(handler.handlers) isnt '[object Array]'))
+	if (typeof ev is 'string') and (toString(handler) is '[object Object]')
+		if (toString(handler.context) isnt '[object Object]') or ((typeof handler.handlers isnt 'function') and (toString(handler.handlers) isnt '[object Array]'))
 			throw new Error 'StoreClass ' + fnName + '(): invalid options object passed in!'
-		else if Object::toString.call(handler.handlers) is '[object Array]'
+		else if toString(handler.handlers) is '[object Array]'
 			for hl in handler.handlers
 				if typeof hl isnt 'function'
 					throw new Error 'StoreClass ' + fnName + '(): invalid options object passed in!'
 	# array of handlers passed in
-	if Object::toString.call(handler) is '[object Array]'
+	if toString(handler) is '[object Array]'
 		for cb in handler
-			if (typeof cb isnt 'function') and (Object::toString.call(cb) isnt '[object Object]')
+			if (typeof cb isnt 'function') and (toString(cb) isnt '[object Object]')
 				throw new Error 'StoreClass ' + fnName + '(): element in handler array is not a function or options object!'
-			else if Object::toString.call(cb) is '[object Object]'
-				if (Object::toString.call(cb.context) isnt '[object Object]') or ((typeof cb.handlers isnt 'function') and (Object::toString.call(cb.handlers) isnt '[object Array]'))
+			else if toString(cb) is '[object Object]'
+				if (toString(cb.context) isnt '[object Object]') or ((typeof cb.handlers isnt 'function') and (toString(cb.handlers) isnt '[object Array]'))
 					throw new Error 'StoreClass ' + fnName + '(): invalid options object passed in!'
-				else if Object::toString.call(cb.handlers) is '[object Array]'
+				else if toString(cb.handlers) is '[object Array]'
 					for hl in cb.handlers
 						if typeof hl isnt 'function'
 							throw new Error 'StoreClass ' + fnName + '(): invalid options object passed in!'
 	# options object passed in - ignore handler parameter
-	else if Object::toString.call(ev) is '[object Object]'
+	else if toString(ev) is '[object Object]'
 		for evId, cb of ev
 			# callback is an options object
-			if Object::toString.call(cb) is '[object Object]'
+			if toString(cb) is '[object Object]'
 				# options object is invalid
-				if (Object::toString.call(cb.context) isnt '[object Object]') and ((typeof cb.handlers isnt 'function') or (Object::toString.call(cb.handlers) isnt '[object Array]'))
+				if (toString(cb.context) isnt '[object Object]') and ((typeof cb.handlers isnt 'function') or (toString(cb.handlers) isnt '[object Array]'))
 					throw new Error 'StoreClass ' + fnName + '(): invalid options object!'
 				# validate options array
-				else if Object::toString.call(cb.handlers) is '[object Array]'
+				else if toString(cb.handlers) is '[object Array]'
 					for fn in cb.handlers
 						if typeof fn isnt 'function'
 							throw new Error 'StoreClass ' + fnName + '(): all handlers must be functions!'
 			# callback isnt function, options object, or array of functions/options objects
-			else if (typeof cb isnt 'function') and (Object::toString.call(cb) isnt '[object Array]')
+			else if (typeof cb isnt 'function') and (toString(cb) isnt '[object Array]')
 				throw new Error 'StoreClass ' + fnName + '(): events map properties must contain event callback functions!'
 			# callback is an array
-			else if Object::toString.call(cb) is '[object Array]'
+			else if toString(cb) is '[object Array]'
 				for obj in cb
 					# array element is neither function nor object
-					if (typeof obj isnt 'function') and (Object::toString.call(obj) isnt '[object Object]')
+					if (typeof obj isnt 'function') and (toString(obj) isnt '[object Object]')
 						throw new Error 'StoreClass ' + fnName + '(): events map properties must contain event callback functions or options!'
 					# validate options object in array
-					else if Object::toString.call(obj) is '[object Object]'
-						if (Object::toString.call(obj.context) isnt '[object Object]') and ((typeof obj.handlers isnt 'function') or (Object::toString.call(obj.handlers) isnt '[object Array]'))
+					else if toString(obj) is '[object Object]'
+						if (toString(obj.context) isnt '[object Object]') and ((typeof obj.handlers isnt 'function') or (toString(obj.handlers) isnt '[object Array]'))
 							throw new Error 'StoreClass ' + fnName + '(): invalid options object!'
 						# validate handlers in options object in array
-						else if Object::toString.call(obj.handlers) is '[object Array]'
+						else if toString(obj.handlers) is '[object Array]'
 							for fn in obj.handlers
 								if typeof fn isnt 'function'
 									throw new Error 'StoreClass ' + fnName + '(): all handlers must be functions!'
@@ -290,7 +293,7 @@ _registerActions = (actionsMap) ->
 _registerAction = (actionId, callback) ->
 	if typeof actionId isnt 'string'
 		throw new Error 'StoreClass registerAction: first argument (actionId) must be a string!'
-	if (typeof callback isnt 'function') and (Object::toString.call(callback) isnt '[object Array]')
+	if (typeof callback isnt 'function') and (toString(callback) isnt '[object Array]')
 		throw new Error 'StoreClass registerAction: second argument (callback) must be a function or an array of functions!'
 	# Init _actions property
 	@_actions = {} unless @_actions
@@ -298,7 +301,7 @@ _registerAction = (actionId, callback) ->
 	# Assign callback string(s)
 	if (typeof callback is 'function')
 		@_actions[actionId].push callback if !(callback in @_actions[actionId])
-	else if Object::toString.call(callback) is '[object Array]'
+	else if toString(callback) is '[object Array]'
 		for cb in callback
 			if typeof cb isnt 'function'
 				throw new Error 'StoreClass registerAction: every element of callback array assigned to ' + actionId + ' must be a function!'
@@ -322,7 +325,7 @@ _unregisterAction = (actionId, callback) ->
 	callbacksRemoved = false
 	if typeof callback is 'function'
 		callbacksRemoved = _removeCallbackFromAction.call(@, actionId, callback)
-	else if Object::toString.call(callback) is '[object Array]'
+	else if toString(callback) is '[object Array]'
 		for cb in callback
 			callbacksRemoved = _removeCallbackFromAction.call(@, actionId, cb)
 	else if (typeof callbackId is 'undefined') or (callbackId is '*')
@@ -344,17 +347,17 @@ _syncValues = ->
 # Event Handler Registration/Unregistration
 _bindEventHandlers = (ev, handler, context) ->
 	_validateBindHandlers 'on', ev, handler
-	if (typeof ev is 'string') and ((typeof handler is 'function') or (Object::toString.call(handler) is '[object Object]'))
+	if (typeof ev is 'string') and ((typeof handler is 'function') or (toString(handler) is '[object Object]'))
 		if typeof context isnt 'undefined'
 			_bindEventHandler.call @, ev, handler, context
 		else
 			_bindEventHandler.call @, ev, handler
-	else if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Array]')
+	else if (typeof ev is 'string') and (toString(handler) is '[object Array]')
 		for cb in handler
 			_bindEventHandler.call @, ev, cb, context
 	else
 		for evId, cb of ev
-			if Object::toString.call(cb) is '[object Array]'
+			if toString(cb) is '[object Array]'
 				for fn in cb
 					_bindEventHandler.call @, evId, fn
 			else
@@ -386,18 +389,18 @@ _bindEventHandler = (ev, handler, context) ->
 			handlers: handler
 	@
 _unbindEventHandlers = (ev, handler) ->
-	if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Array]')
+	if (typeof ev is 'string') and (toString(handler) is '[object Array]')
 		for cb in handler
 			if typeof cb isnt 'function'
 				throw new Error 'StoreClass off(): handlers list for ' + ev + ' may only contain functions!'
 			_unbindEventHandler.call @, ev, cb
 	else if (typeof ev is 'string')
-		if (typeof handler isnt 'undefined') and (typeof handler isnt 'function') and (Object::toString.call(handler) isnt '[object Object]')
+		if (typeof handler isnt 'undefined') and (typeof handler isnt 'function') and (toString(handler) isnt '[object Object]')
 			throw new Error 'StoreClass off(): handler parameter must be a function or options object!'
 		_unbindEventHandler.call @, ev, handler
-	else if Object::toString.call(ev) is '[object Object]'
+	else if toString(ev) is '[object Object]'
 		for evId, cb of ev
-			if Object::toString.call(cb) is '[object Array]'
+			if toString(cb) is '[object Array]'
 				for fn in cb
 					if typeof fn isnt 'function'
 						throw new Error 'StoreClass off(): handlers list for ' + ev + ' may only contain functions!'
@@ -440,13 +443,13 @@ _unbindEventHandler = (ev, handler) ->
 # Dispatch-Event Handlers
 _dispatchHandler = (payload)->
 	# Validate payload
-	if Object::toString.call(payload) isnt '[object Object]'
+	if toString(payload) isnt '[object Object]'
 		console.warn 'StoreClass _dispatchHandler expects a single object payload! Aborting...'
 		return
 	if typeof payload.actionId isnt 'string'
 		console.warn 'StoreClass _dispatchHandler expects a string actionId in the payload! Aborting...'
 		return
-	if Object::toString.call(payload.value) isnt '[object Object]'
+	if toString(payload.value) isnt '[object Object]'
 		console.warn 'StoreClass _dispatchHandler expects an object value in the payload! Aborting...'
 		return
 	# Fire all registered callbacks for the actionId
@@ -472,7 +475,7 @@ _emitChanges = (changedArray) ->
 				emitted.push ev
 				for handler in handlers
 					continue if handler in handled
-					if Object::toString.call(handler) is '[object Object]'
+					if toString(handler) is '[object Object]'
 						ctx = handler.context
 						hl = handler.handlers
 						if typeof hl is 'function'
@@ -500,7 +503,7 @@ _get = (key, numPrev) ->
 	else if typeof key is 'string'
 		keyChain = key.split '.'
 		for k in keyChain
-			if Object::toString.call(value) isnt '[object Object]'
+			if toString(value) isnt '[object Object]'
 				console.warn 'Current store value: ', @value
 				throw new Error 'StoreClass get: cannot find key "' + key + '" in current store value!'
 			value = value[k]
