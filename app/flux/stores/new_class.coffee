@@ -433,10 +433,13 @@ _syncValues = ->
 	@_value = clone @value
 
 # Event Handler Registration/Unregistration
-_bindEventHandlers = (ev, handler) ->
+_bindEventHandlers = (ev, handler, context) ->
 	_validateBindHandlers 'on', ev, handler
 	if (typeof ev is 'string') and ((typeof handler is 'function') or (Object::toString.call(handler) is '[object Object]'))
-		_bindEventHandler.call @, ev, handler
+		if typeof context isnt 'undefined'
+			_bindEventHandler.call @, ev, handler, context
+		else
+			_bindEventHandler.call @, ev, handler
 	else if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Array]')
 		for cb in handler
 			_bindEventHandler.call @, ev, cb
@@ -448,7 +451,7 @@ _bindEventHandlers = (ev, handler) ->
 			else
 				_bindEventHandler.call @, evId, cb
 	@
-_bindEventHandler = (ev, handler) ->
+_bindEventHandler = (ev, handler, context) ->
 	# Validate arguments
 	ev = 'change' unless ev
 	if ev.indexOf('change') < 0
@@ -466,8 +469,12 @@ _bindEventHandler = (ev, handler) ->
 	@_eventHandlers[evId] = [] unless @_eventHandlers[evId]
 	if @_eventHandlers[evId].indexOf(handler) >= 0
 		console.warn 'StoreClass on(): handler for event ' + ev + ' already bound!'
-	else
+	else if typeof context is 'undefined'
 		@_eventHandlers[evId].push handler
+	else
+		@_eventHandlers[evId].push
+			context: context
+			handlers: handler
 	@
 _unbindEventHandlers = (ev, handler) ->
 	if (typeof ev is 'string') and (Object::toString.call(handler) is '[object Array]')
