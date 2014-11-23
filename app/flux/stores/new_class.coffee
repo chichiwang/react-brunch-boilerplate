@@ -582,8 +582,15 @@ module.exports = StoreClass = class StoreClass
 	Dispatcher: undefined
 	_dispatcherToken: undefined
 
+	_initialized: false
+	_disposed: false
+
 	constructor: (options = {}) ->
+		@initialize options
+	initialize: (options = {}) ->
 		_init.call @, options
+		@_disposed = false
+		@_initialized = true
 
 	# Public Registration Methods
 	registerActions: (args...) ->
@@ -615,6 +622,22 @@ module.exports = StoreClass = class StoreClass
 		_unbindEventHandlers.apply @, args
 
 	dispose: ->
-		# TODO:
-		# Unregister from Dispatcher using @_dispatcherToken
-		# Recurse through all self properties, set to null, delete
+		return if @_disposed
+
+		# Reset internal property values
+		@off()
+		@Dispatcher.unregister @_dispatcherToken
+
+		props = [ '_history',
+				  '_value',
+				  'value',
+				  '_actions',
+				  '_callbacks',
+				  'Dispatcher',
+				  '_dispatcherToken'
+		]
+		this[prop] = undefined for prop in props
+		@maxHistory = 5
+		@_initialized = false
+		@_disposed = true
+		@
