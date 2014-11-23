@@ -5,8 +5,13 @@ if typeof objectCreate isnt 'function'
 		F = ->
 		F.prototype = o
 		return new F()
+classToType = do ->
+	objectMap = {}
+	for name in "Boolean Number String Function Array Date RegExp Undefined Null".split(" ")
+		objectMap["[object " + name + "]"] = name.toLowerCase()
+	objectMap
 
-module.exports = Helpers =
+Helpers =
 	isEmpty: (obj) ->
 		if (obj is null) or (typeof obj is 'undefined')
 			return true
@@ -22,9 +27,10 @@ module.exports = Helpers =
 			for key in obj
 				return false if hasOwnProperty.call(obj, key)
 		true
-	isArray: (obj) ->
-		return true if Object::toString.call(obj) is '[object Array]'
-		return false
+	type: (obj) ->
+		return 'undefined' if typeof obj is 'undefined'
+		strType = Object::toString.call(obj)
+		classToType[strType] or "object"
 	# A mix of solutions from:
 	# http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object/13333781#13333781
 	# http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning
@@ -42,7 +48,7 @@ module.exports = Helpers =
 		# Native/Custom Clone Methods
 		return obj.clone(true) if typeof obj.clone is 'function'
 		# Array Object
-		if isArray obj
+		if type(obj) is 'array'
 			result = obj.slice()
 			for el, idx in result
 				result[idx] = clone el, _copied
@@ -73,5 +79,7 @@ module.exports = Helpers =
 		# TODO: Write a deep extend method
 		console.log 'Helpers.merge: ', destination, sources
 
-isArray = Helpers.isArray
+type = Helpers.type
 clone = Helpers.clone
+
+module.exports = Helpers

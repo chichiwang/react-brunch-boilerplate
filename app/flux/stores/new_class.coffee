@@ -2,14 +2,17 @@
 
 # Helper Utility Methods
 # Note: Change the require path to access the global framework object when modularizing
-type = do ->
-	classToType = {}
-	for name in "Boolean Number String Function Array Date RegExp Undefined Null".split(" ")
-		classToType["[object " + name + "]"] = name.toLowerCase()
-	(obj) ->
-		return 'undefined' if typeof obj is 'undefined'
-		strType = Object::toString.call(obj)
-		classToType[strType] or "object"
+try type = require('util/helpers').type
+catch
+	classToType = do ->
+		objectMap = {}
+		for name in "Boolean Number String Function Array Date RegExp Undefined Null".split(" ")
+			objectMap["[object " + name + "]"] = name.toLowerCase()
+		objectMap
+	type = (obj) ->
+			return 'undefined' if typeof obj is 'undefined'
+			strType = Object::toString.call(obj)
+			classToType[strType] or "object"
 
 try clone = require('util/helpers').clone
 catch
