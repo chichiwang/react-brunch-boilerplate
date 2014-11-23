@@ -14,7 +14,7 @@ changeHandler4 = (val) ->
 callback1 = ->
 	console.log 'callback1', arguments
 callback2 = (v)->
-	console.log 'callback2', arguments
+	console.log 'callback2', v
 	@value = v
 callback3 = ->
 	console.log 'callback3', arguments
@@ -49,6 +49,8 @@ module.exports = StoreInstance = new StoreClass
 
 StoreInstance.ch1 = changeHandler1
 StoreInstance.ch2 = changeHandler2
+StoreInstance.cb1 = callback1
+StoreInstance.cb2 = callback2
 
 StoreInstance.on 'change:key4', [changeHandler0, changeHandler4], { ctx: 'test context +4' }
 

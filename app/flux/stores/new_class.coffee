@@ -2,11 +2,6 @@
 
 # Helper Utility Methods
 # Note: Change the require path to access the global framework object when modularizing
-try isArray = require('util/helpers').isArray
-catch
-	isArray = (obj) ->
-		return true if Object::toString.call(obj) is '[object Array]'
-		return false
 try clone = require('util/helpers').clone
 catch
 	objectCreate = Object.create
@@ -29,7 +24,7 @@ catch
 		# Native/Custom Clone Methods
 		return obj.clone(true) if typeof obj.clone is 'function'
 		# Array Object
-		if isArray obj
+		if Object::toString.call(obj) is '[object Array]'
 			result = obj.slice()
 			for el, idx in result
 				result[idx] = clone el, _copied
@@ -205,30 +200,19 @@ _validateActions = (fnName, actionsMap) ->
 	# Validate actionsMap is an object
 	isObject = Object::toString.call(actionsMap) is '[object Object]'
 	isNull = actionsMap is null
-	if (not isObject) or (isArray actionsMap) or isNull
+	if (not isObject) or (Object::toString.call(actionsMap) is '[object Array]') or isNull
 		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
 	# Validate actionsMap properties
 	for key, val of actionsMap
 		if actionsMap.hasOwnProperty? and not actionsMap.hasOwnProperty key
 			continue
 		# Validate actionObj key/value pairs
-		if (typeof val isnt 'string') and (typeof val isnt 'undefined') and (not isArray val)
-			throw new Error 'StoreClass registerActions: property ' + key + ' must contain a string or array of strings!'
-		else if (isArray val)
+		if (typeof val isnt 'function') and (typeof val isnt 'undefined') and (Object::toString.call(val) isnt '[object Array]')
+			throw new Error 'StoreClass registerActions: property ' + key + ' must contain a function or array of functions!'
+		else if (Object::toString.call(val) is '[object Array]')
 			for element in val
-				if typeof element isnt 'string'
-					throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of strings!'
-_validateCallbacks = (fnName, callbacksMap) ->
-	# Validate callbacksMap is an object
-	isObject = Object::toString.call(callbacksMap) is '[object Object]'
-	isNull = callbacksMap is null
-	if (not isObject) or (isArray callbacksMap) or isNull
-		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
-	for key, val of callbacksMap
-		if callbacksMap.hasOwnProperty? and not callbacksMap.hasOwnProperty key
-			continue
-		if typeof val isnt 'function'
-			throw new Error 'StoreClass ' + fnName + ': property ' + key + ' of parameter must be a function!'
+				if typeof element isnt 'function'
+					throw new Error 'StoreClass registerActions: array property ' + key + ' must be a list of functions!'
 _validateBindHandlers = (fnName, ev, handler) ->
 	if (typeof ev isnt 'string') and (Object::toString.call(ev) isnt '[object Object]')
 		throw new Error 'StoreClass ' + fnName + '(): arguments passed in must be either (event, handler) or (eventsMap)!'
@@ -287,77 +271,39 @@ _validateBindHandlers = (fnName, ev, handler) ->
 									throw new Error 'StoreClass ' + fnName + '(): all handlers must be functions!'
 
 # Registration/Unregistration Helpers
-_removeCallbackFromAction = (actionId, callbackId) ->
-	if @_actions[actionId].indexOf(callbackId) < 0
-		console.warn 'StoreClass unregisterAction: no callback ' + callbackId + ' registered to action ' + actionId + '!'
+_removeCallbackFromAction = (actionId, callback) ->
+	if @_actions[actionId].indexOf(callback) < 0
+		cbStr = callback.toString().substr(0, 20).replace(/\n/g, ' ') + '...'
+		console.warn 'StoreClass unregisterAction: no callback ' + cbStr + ' registered to action ' + actionId + '!'
 		return false
 	else
-		@_actions[actionId].splice(@_actions[actionId].indexOf(callbackId), 1)
+		@_actions[actionId].splice(@_actions[actionId].indexOf(callback), 1)
 		return true
-_cleanupCallbacks = ->
-	callbacks = []
-	for callback of @_callbacks
-		callbackReferenced = false
-		for action, cbs of @_actions
-			callbackReferenced = true if cbs.indexOf(callback) >= 0
-		delete @_callbacks[callback] if !callbackReferenced
-	callbacks
-_cleanupActions = ->
-	callbacks = []
-	for action, cbs of @_actions
-		for cb in cbs
-			callbacks.push(cb) if !@_callbacks.hasOwnProperty(cb)
-	for callback in callbacks
-		for action, cbs of @_actions
-			cbs.splice(cbs.indexOf(callback), 1) if cbs.indexOf(callback) >= 0
-			delete @_actions[action] if cbs.length is 0
-	callbacks
 
 # Static Registration Methods
 _registerActions = (actionsMap) ->
 	_validateActions 'registerActions', actionsMap
 	# Merge with internal actions list
 	for key, val of actionsMap
-		if typeof val is 'undefined'
-			throw new Error 'StoreClass registerActions: property ' + key + ' must be a string or array of strings!'
 		@registerAction key, val
 	@
-_registerAction = (actionId, callbackId) ->
+_registerAction = (actionId, callback) ->
 	if typeof actionId isnt 'string'
 		throw new Error 'StoreClass registerAction: first argument (actionId) must be a string!'
-	if (typeof callbackId isnt 'string') and (!isArray callbackId)
-		throw new Error 'StoreClass registerAction: second argument (callbackId) must be a string or an array of strings!'
+	if (typeof callback isnt 'function') and (Object::toString.call(callback) isnt '[object Array]')
+		throw new Error 'StoreClass registerAction: second argument (callback) must be a function or an array of functions!'
 	# Init _actions property
 	@_actions = {} unless @_actions
 	@_actions[actionId] = [] unless @_actions[actionId]
 	# Assign callback string(s)
-	if (typeof callbackId is 'string')
-		if callbackId is '*'
-			throw new Error 'StoreClass registerAction: invalid callback id assigned to action ' + actionId + '!'
-		@_actions[actionId].push callbackId if !(callbackId in @_actions[actionId])
-	else if isArray callbackId
-		for name in callbackId
-			if typeof name isnt 'string'
-				throw new Error 'StoreClass registerAction: every element of callback array assigned to ' + actionId + ' must be a string!'
-			@_actions[actionId].push(name) if !(name in @_actions[actionId])
+	if (typeof callback is 'function')
+		@_actions[actionId].push callback if !(callback in @_actions[actionId])
+	else if Object::toString.call(callback) is '[object Array]'
+		for cb in callback
+			if typeof cb isnt 'function'
+				throw new Error 'StoreClass registerAction: every element of callback array assigned to ' + actionId + ' must be a function!'
+			@_actions[actionId].push(cb) if !(cb in @_actions[actionId])
 	@
-_registerCallbacks = (callbacksMap) ->
-	_validateCallbacks 'registerCallbacks', callbacksMap
-	# Merge with internal callbacks list
-	for key, val of callbacksMap
-		if callbacksMap.hasOwnProperty? and not callbacksMap.hasOwnProperty key
-			continue
-		@registerCallback key, val
-	@
-_registerCallback = (callbackId, callbackFn) ->
-	@_callbacks = {} unless @_callbacks
-	if typeof callbackId isnt 'string'
-		throw new Error 'StoreClass registerCallback: callbackId passed to this method must be a string!'
-	if typeof callbackFn isnt 'function'
-		throw new Error 'StoreClass registerCallback: callbackFn passed to this method must be a function!'
-	@_callbacks[callbackId] = callbackFn
-	@
-
 # Static Unregistration Methods
 _unregisterActions = (actionsMap) ->
 	_validateActions 'unregisterActions', actionsMap
@@ -365,7 +311,7 @@ _unregisterActions = (actionsMap) ->
 	for key, val of actionsMap
 		@unregisterAction key, val
 	@
-_unregisterAction = (actionId, callbackId) ->
+_unregisterAction = (actionId, callback) ->
 	if typeof actionId isnt 'string'
 		throw new Error 'StoreClass unegisterAction: first argument (actionId) must be a string!'
 	if typeof @_actions is 'undefined'
@@ -374,54 +320,17 @@ _unregisterAction = (actionId, callbackId) ->
 		throw new Error 'StoreClass unregisterAction: there are no callbacks registered to action ' + actionId + '!'
 	# Remove callback string(s)
 	callbacksRemoved = false
-	if (typeof callbackId is 'string') and (callbackId isnt '*')
-		callbacksRemoved = _removeCallbackFromAction.call(@, actionId, callbackId)
-	else if isArray callbackId
-		for name in callbackId
-			callbacksRemoved = true if _removeCallbackFromAction.call(@, actionId, name)
+	if typeof callback is 'function'
+		callbacksRemoved = _removeCallbackFromAction.call(@, actionId, callback)
+	else if Object::toString.call(callback) is '[object Array]'
+		for cb in callback
+			callbacksRemoved = _removeCallbackFromAction.call(@, actionId, cb)
 	else if (typeof callbackId is 'undefined') or (callbackId is '*')
 		callbacksRemoved = true if @_actions[actionId].length > 0
 		@_actions[actionId].length = 0
 	else
-		throw new Error 'StoreClass unregisterAction: optional second argument callbackId must be a string or array of strings!'
+		throw new Error 'StoreClass unregisterAction: optional second argument callbackId must be a function or array of functions!'
 	delete @_actions[actionId] if @_actions[actionId].length is 0
-	_cleanupCallbacks.call(@) if callbacksRemoved
-	@
-_unregisterCallbacks = (callbacksList) ->
-	if not isArray callbacksList
-		throw new Error 'StoreClass unregisterCallbacks: parameter passed in must be an array of callback ids or functions!'
-	# Remove from internal callbacks list
-	for cb in callbacksList
-		if (typeof cb isnt 'string') and (typeof cb isnt 'function')
-			throw new Error 'StoreClass unregisterCallbacks: list of callbacks to unregister must only contain string ids and functions!'
-		@unregisterCallback cb
-	@
-_unregisterCallback = (callback) ->
-	if typeof @_callbacks is 'undefined'
-		throw new Error 'StoreClass unregisterCallback: there are no currently defined callbacks!'
-	callbackRemoved = false
-	if typeof callback is 'string'
-		if typeof @_callbacks[callback] is 'undefined'
-			console.warn 'StoreClass unregisterCallback: there is no callback with the id ' + callback + '!'
-		else
-			delete @_callbacks[callback]
-			callbackRemoved = true
-	else if typeof callback is 'function'
-		found = false
-		keys = []
-		for key, val of @_callbacks
-			if callback is val
-				found = true
-				keys.push key
-		if not found
-			console.warn 'StoreClass unregisterCallback: function passed in does not match any registered callbacks!'
-		else
-			for key in keys
-				delete @_callbacks[key]
-				callbackRemoved = true
-	else
-		throw new Error 'StoreClass unregisterCallback: parameter passed in must be a callback id string or a function!'
-	_cleanupActions.call(@) if callbackRemoved
 	@
 
 # Value helper methods
@@ -545,7 +454,7 @@ _dispatchHandler = (payload)->
 	for action, callbacks of @_actions
 		continue if action isnt actionId
 		for callback in callbacks
-			@_callbacks[callback].call(@, value) if typeof @_callbacks[callback] is 'function'
+			callback.call(@, value) if typeof callback is 'function'
 	# If @value has changed, update @_history and @_value and emit the changes
 	diff = _diffObjects @value, @_value
 	if diff.length > 0
@@ -638,7 +547,6 @@ module.exports = StoreClass = class StoreClass
 	value: undefined # value is mutable by callback functions, then checked against internal _value
 	
 	_actions: undefined # object map of actions to methods
-	_callbacks: undefined # list of callbacks
 
 	_eventHandlers: undefined # object map of events to handlers
 
@@ -660,19 +568,10 @@ module.exports = StoreClass = class StoreClass
 		_registerActions.apply @, args
 	registerAction: (args...) ->
 		_registerAction.apply @, args
-	registerCallbacks: (args...) ->
-		_registerCallbacks.apply @, args
-	registerCallback: (args...) ->
-		_registerCallback.apply @, args
-	# Unregistration Methods
 	unregisterActions: (args...) ->
 		_unregisterActions.apply @, args
 	unregisterAction: (args...) ->
 		_unregisterAction.apply @, args
-	unregisterCallbacks: (args...) ->
-		_unregisterCallbacks.apply @, args
-	unregisterCallback: (args...) ->
-		_unregisterCallback.apply @, args
 
 	# Get Value, Bind and Unbind Change Methods
 	get: (args...) ->
