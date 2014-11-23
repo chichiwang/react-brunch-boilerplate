@@ -24,6 +24,8 @@ module.exports = ActionClass = class ActionClass
 	_initialized: false
 	_disposed: false
 
+	Dispatcher: undefined
+
 	constructor: (options = {}) ->
 		@initialize options
 	initialize: (options = {}) ->
@@ -31,9 +33,9 @@ module.exports = ActionClass = class ActionClass
 		@_disposed = false
 		@_initialized = true
 
-	registerActions: (actionId, val) ->
+	register: (actionId, val) ->
 		# ...
-	registerAction: (actionId, val) ->
+	unregister: (actionId) ->
 		# ...
 
 	dispose: ->
