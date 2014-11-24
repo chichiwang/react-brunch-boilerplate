@@ -79,8 +79,8 @@ _validate = (options) ->
 		throw new Error 'ActionClass _validate: options passed to constructor must be an object!'
 	if type(options.dispatcher) isnt 'object'
 		throw new Error 'ActionClass _validate: constructor must be passed a dispatcher instance!'
-	if type(options.dispatcher.register) isnt 'function'
-		throw new Error 'ActionClass _validate: dispatcher passed in must have a method "register"!'
+	if type(options.dispatcher.dispatch) isnt 'function'
+		throw new Error 'ActionClass _validate: dispatcher passed in must have a method "dispatch"!'
 	if (type(options.actions) isnt 'undefined') and (type(options.actions) isnt 'object')
 		throw new Error 'ActionClass _validate: actions property passed into options must be an object map!'
 
@@ -130,6 +130,18 @@ _call = (context, actionId, args...) ->
 	payload.value = clone val
 	@Dispatcher.dispatch payload
 
+_dispose = ->
+	return if @_disposed
+	# Reset internal property values
+	props = [
+		'_actions',
+		'Dispatcher'
+	]
+	this[prop] = undefined for prop in props
+	@_initialized = false
+	@_disposed = true
+	@
+
 # Action Class
 # Class Constructor
 # options =
@@ -166,4 +178,4 @@ module.exports = ActionClass = class ActionClass
 		_call.apply @, args
 
 	dispose: ->
-		# ...
+		_dispose.call @
