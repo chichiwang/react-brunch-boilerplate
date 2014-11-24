@@ -38,9 +38,9 @@ Root = React.createClass
 		Actions.dispatch SiteStore.SET, site
 
 	componentWillMount: ->
-		@_initState()
-		@_bindEvents()
-		@_resize()
+		# @_initState()
+		# @_bindEvents()
+		# @_resize()
 
 	render: ->
 		console.log 'render', @state
