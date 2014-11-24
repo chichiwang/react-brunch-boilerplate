@@ -217,7 +217,7 @@ _validateActions = (fnName, actionsMap) ->
 		throw new Error 'StoreClass ' + fnName + ': parameter passed in must be an object!'
 	# Validate actionsMap properties
 	for key, val of actionsMap
-		if actionsMap.hasOwnProperty? and not actionsMap.hasOwnProperty key
+		if actionsMap.hasOwnProperty? and !actionsMap.hasOwnProperty key
 			continue
 		# Validate actionObj key/value pairs
 		if (type(val) isnt 'function') and (type(val) isnt 'undefined') and (type(val) isnt 'array')
@@ -421,8 +421,7 @@ _unbindEventHandlers = (ev, handler) ->
 				_unbindEventHandler.call @, evId, cb
 	else if type(ev) is 'undefined'
 		for key of @_eventHandlers
-			if !@_eventHandlers.hasOwnProperty key
-				continue
+			continue if @_eventHandlers.hasOwnProperty? and !@_eventHandlers.hasOwnProperty key
 			delete @_eventHandlers[key]
 	else
 		throw new Error 'StoreClass off(): invalid parameters!'
@@ -570,9 +569,6 @@ _dispose = ->
 #		key1: val1
 #		key2: val2
 module.exports = StoreClass = class StoreClass
-
-	# TODO:
-	# Rework actions and callbacks to simplify API to only manage actions
 
 	maxHistory: 5
 	_history: undefined # list of up to @maxHistory previous store values
