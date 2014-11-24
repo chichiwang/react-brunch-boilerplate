@@ -125,9 +125,9 @@ _call = (context, actionId, args...) ->
 		else
 			val = @_actions[actionId](args)
 	else val = @_actions[actionId]
-	payload =
-		actionId: actionId
-		value: val
+	payload = {}
+	payload.actionId = clone actionId
+	payload.value = clone val
 	@Dispatcher.dispatch payload
 
 # Action Class
