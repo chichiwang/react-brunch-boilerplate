@@ -5,21 +5,21 @@
 SiteStore = require 'stores/site'
 
 # Helpers and utilities
-Router = require 'flux/router'
-Actions = require 'actions'
+# Router = require 'flux/router'
+# Actions = require 'actions'
 Dispatcher = require 'dispatcher'
-BindStores = require 'util/mixins/bindstores'
+# BindStores = require 'util/mixins/bindstores'
 
 Root = React.createClass
 	displayName: 'Root'
-	mixins: [BindStores]
+	# mixins: [BindStores]
 	stores:
 		site: SiteStore
-		route: Router.store
+		# route: Router.store
 	
 	_initState: ->
 		site = @state.site
-		Actions.dispatch SiteStore.SET, site
+		# Actions.dispatch SiteStore.SET, site
 
 	_bindEvents: ->
 		$(window).bind('resize', @_resize)
