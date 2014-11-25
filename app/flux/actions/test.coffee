@@ -1,4 +1,4 @@
-ActionClass = require './new_class'
+ActionClass = require './class'
 
 setStore = (v) ->
 	return v

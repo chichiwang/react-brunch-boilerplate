@@ -458,8 +458,8 @@ _dispatchHandler = (payload)->
 	if type(payload.actionId) isnt 'string'
 		console.warn 'StoreClass _dispatchHandler expects a string actionId in the payload! Aborting...'
 		return
-	if type(payload.value) isnt 'object'
-		console.warn 'StoreClass _dispatchHandler expects an object value in the payload! Aborting...'
+	if payload.hasOwnProperty? and !payload.hasOwnProperty 'value'
+		console.warn 'StoreClass _dispatchHandler expects an property "value" in the payload! Aborting...'
 		return
 	# Fire all registered callbacks for the actionId
 	{ actionId, value } = payload

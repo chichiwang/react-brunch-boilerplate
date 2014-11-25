@@ -1,4 +1,4 @@
-StoreClass = require './new_class'
+StoreClass = require './class'
 
 changeHandler0 = (val) ->
 	console.log 'changeHandler0: ', val, @
