@@ -6,10 +6,8 @@
   "private": true,
   "dependencies": {
     "console-polyfill": "~0.1.0",
-    "jquery": "~2.1.1",
     "normalize-css": "~2.1.2",
     "h5bp-helpers": "~0.1.0",
-    "lodash": "~2.4.1",
     "react": "~0.11.1",
     "director": "git://github.com/ryancbarry/director.git#feature/hashbang",
     "javascript-state-machine": "~2.3.0"
