@@ -92,7 +92,10 @@ _FSMCallbacks = (paths, defaultTransition) ->
 	if type(callbacks.onleavestate) isnt 'undefined'
 		throw new Error('Router _FSMCallbacks: "leavestate" is a reserved router id.')
 	callbacks.onleavestate = (event, from, to, msg) ->
-		return StateMachine.ASYNC if from isnt 'none' and transitionsEnabled
+		# console.log 'onLeaveState: ', event, from, to, msg, from isnt 'none' and transitionsEnabled
+		return StateMachine.ASYNC if from isnt 'none' and from isnt 'initialState' and transitionsEnabled
+	# callbacks.onenterstate = (event, from, to, msg) ->
+	# 	console.log 'onEnterState: ', event, from, to, msg
 
 	callbacks
 
@@ -109,7 +112,6 @@ _FSM = (options) ->
 
 _directorCallback = (params, routeParams, stateMethod, FSM) ->
 	return -> 
-			# console.log '_directorCallback', stateMethod
 			for param, idx in routeParams
 				params[param] = arguments[idx]
 			FSM.transition?() if transitionsEnabled
@@ -134,13 +136,17 @@ _directorConfig = (options, FSM) ->
 	config
 
 _directorDefault = (router, routeObj, FSM) ->
+	params = {}
+	for key, val of routeObj
+		if routeObj.hasOwnProperty key
+			params[key] = val
 	FSM.onbeforegodefault = (event, from, to, msg) ->
 		routeObj.prevState = from
 		routeObj.curState = to
 		Actions.call Constant.SET_VALUE, routeObj
 	router.notfound = ->
 		FSM.transition?() if transitionsEnabled
-		FSM.godefault()
+		FSM.godefault(params)
 
 module.exports = class Router
 	hasInit: false
