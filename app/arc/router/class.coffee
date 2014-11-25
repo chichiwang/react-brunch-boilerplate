@@ -154,7 +154,6 @@ module.exports = class Router
 
 	constructor: (options) ->
 		options = RouterConfig unless options
-		console.log 'Router constructor: ', options
 		@options = options
 
 	initialize: (options) ->
@@ -164,31 +163,35 @@ module.exports = class Router
 			return false
 		@hasInit = true
 
-		console.log 'Router initialize: ', options
-
-		# Options
+		# Prep options
 		_validateOptions options
-		# TODO: merge defaults manually
-		options = _.merge @defaults, options
+		options = clone options
+		options.initial = @defaults.initial if options.hasOwnProperty? and !options.hasOwnProperty('initial')
+		options.history = @defaults.history if options.hasOwnProperty? and !options.hasOwnProperty('history')
+		options.transitions = @defaults.transitions if options.hasOwnProperty? and !options.hasOwnProperty('transitions')
+		@options = options
+
 		transitionsEnabled = options.transitions
+
+		console.log 'Router initialize: ', options
 
 		# Set up FSM
 		# TODO: remove router history feature
 		@FSM = _FSM options, @_history
 		# console.log 'Router init:', @FSM
 
-		# Make Router Store public
-		@store = RouterStore
+		# # Make Router Store public
+		# @store = RouterStore
 
-		# Instantiate Director, init Director
-		directorConfig = _directorConfig options, @FSM
-		@router = new DirectorRouter directorConfig
-		@router.configure({ html5history: options.history })
-		$(document).ready =>
-			# console.log 'Router init'
-			@router.init(options.initial)
-			_directorDefault(@router, options.paths['**'], @FSM) if options.paths['**']
-		# console.log 'Router init:', @router
+		# # Instantiate Director, init Director
+		# directorConfig = _directorConfig options, @FSM
+		# @router = new DirectorRouter directorConfig
+		# @router.configure({ html5history: options.history })
+		# $(document).ready =>
+		# 	# console.log 'Router init'
+		# 	@router.init(options.initial)
+		# 	_directorDefault(@router, options.paths['**'], @FSM) if options.paths['**']
+		# # console.log 'Router init:', @router
 
 	transition: ->
 		@FSM.transition?() if transitionsEnabled
@@ -198,4 +201,3 @@ module.exports = class Router
 		if stepsBack > 2
 			throw new Error('Router history: Router only holds the two most recent entries of history.')
 		@_history[stepsBack - 1]
-
