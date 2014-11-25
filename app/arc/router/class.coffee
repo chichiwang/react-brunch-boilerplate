@@ -29,9 +29,9 @@ _validateOptions = (options) ->
 	if type(options.paths) isnt 'object'
 		throw new Error 'Router _validateOptions: paths property in config must be an object'
 	for path of options.paths
-		if typeof options.paths[path] isnt 'object'
+		if type(options.paths[path]) isnt 'object'
 			throw new Error 'Router _validateOptions: path parameters must be an object'
-		if typeof options.paths[path].routeId isnt 'string'
+		if type(options.paths[path].routeId) isnt 'string'
 			throw new Error 'Router _validateOptions: path objects must contain a string property "routeId"'
 
 _isTransitioned = (from) ->
@@ -53,8 +53,9 @@ _getFSMEvents = (paths) ->
 	events
 
 lastState = undefined
-_FSMCallback = (route, routeOptions, transitioned, defaultTransition, routerHistory) ->
+_FSMCallback = (route, routeOptions, transitioned, defaultTransition) ->
 	return (event, from, to, msg) ->
+		# console.log '_FSMCallback: ', event, from, to, msg
 		actionOptions =
 			path: '#'+route
 			prevState: from
@@ -64,45 +65,41 @@ _FSMCallback = (route, routeOptions, transitioned, defaultTransition, routerHist
 		overrideableKeys = ['path']
 		if msg 
 			for k, v of msg
-				if typeof actionOptions[k] isnt 'undefined' and not k in overrideableKeys
+				if type(actionOptions[k]) isnt 'undefined' and not k in overrideableKeys
 					throw new Error('Router _FSMCallback: Route placeholder "' + k + '" conflicts with already defined store property.' + v)
 				actionOptions[k] = v
 		storeState = RouterStore.get()
 		delete storeState.transitioned
 		newState = clone actionOptions
 		delete newState.transitioned
-		if !_.isEqual(newState, storeState) and !_.isEqual(newState, lastState)
-			lastState = newState
-			routerHistory[1] = routerHistory[0]
-			routerHistory[0] = storeState
 
 		# console.log '_FSMCallback', actionOptions
-		Actions.dispatch RouterStore.SET, actionOptions
+		Actions.call Constant.SET_VALUE, actionOptions
 
 
-_FSMCallbacks = (paths, defaultTransition, routerHistory) ->
+_FSMCallbacks = (paths, defaultTransition) ->
 	_routeHash = {}
 	callbacks = {}
 	for route, routeOptions of paths
 		continue if _routeHash[routeOptions.routeId]
 		_routeHash[routeOptions.routeId] = true
 		key = 'onbeforego' + routeOptions.routeId
-		callbacks[key] = _FSMCallback route, routeOptions, false, defaultTransition, routerHistory
+		callbacks[key] = _FSMCallback route, routeOptions, false, defaultTransition
 		key = 'on' + routeOptions.routeId
-		callbacks[key] = _FSMCallback route, routeOptions, true, defaultTransition, routerHistory
+		callbacks[key] = _FSMCallback route, routeOptions, true, defaultTransition
 
-	if typeof callbacks.onleavestate isnt 'undefined'
+	if type(callbacks.onleavestate) isnt 'undefined'
 		throw new Error('Router _FSMCallbacks: "leavestate" is a reserved router id.')
 	callbacks.onleavestate = (event, from, to, msg) ->
 		return StateMachine.ASYNC if from isnt 'none' and transitionsEnabled
 
 	callbacks
 
-_FSM = (options, routerHistory) ->
+_FSM = (options) ->
 	fsmOptions = 
 		initial: 'initialState'
 		events: _getFSMEvents(options.paths)
-		callbacks: _FSMCallbacks(options.paths, options.defaultTransition, routerHistory)
+		callbacks: _FSMCallbacks(options.paths, options.defaultTransition)
 	fsmOptions.events.push
 		name: 'godefault'
 		from: [ '*' ]
@@ -139,13 +136,12 @@ _directorDefault = (router, routeObj, FSM) ->
 	FSM.onbeforegodefault = (event, from, to, msg) ->
 		routeObj.prevState = from
 		routeObj.curState = to
-		Actions.dispatch RouterStore.SET, routeObj
+		Actions.call Constant.SET_VALUE, routeObj
 	router.notfound = ->
 		FSM.transition?() if transitionsEnabled
 		FSM.godefault()
 
 module.exports = class Router
-	_history: [{}, {}]
 	hasInit: false
 	defaults:
 		initial: '/'
@@ -173,31 +169,25 @@ module.exports = class Router
 
 		transitionsEnabled = options.transitions
 
-		console.log 'Router initialize: ', options
+		# console.log 'Router initialize: ', options
 
 		# Set up FSM
-		# TODO: remove router history feature
-		@FSM = _FSM options, @_history
-		# console.log 'Router init:', @FSM
+		@FSM = _FSM options
+		# console.log 'Router initialize FSM:', @FSM
 
-		# # Make Router Store public
-		# @store = RouterStore
+		# Make Router Store public
+		@store = RouterStore
 
-		# # Instantiate Director, init Director
-		# directorConfig = _directorConfig options, @FSM
-		# @router = new DirectorRouter directorConfig
-		# @router.configure({ html5history: options.history })
-		# $(document).ready =>
-		# 	# console.log 'Router init'
-		# 	@router.init(options.initial)
-		# 	_directorDefault(@router, options.paths['**'], @FSM) if options.paths['**']
-		# # console.log 'Router init:', @router
+		# Instantiate Director, init Director
+		directorConfig = _directorConfig options, @FSM
+		@router = new DirectorRouter directorConfig
+		@router.configure({ html5history: options.history })
+		$(document).ready =>
+			# console.log 'Router init'
+			@router.init(options.initial)
+			_directorDefault(@router, options.paths['**'], @FSM) if options.paths['**']
+		# console.log 'Router initialize router:', @router
+		@
 
 	transition: ->
 		@FSM.transition?() if transitionsEnabled
-
-	history: (stepsBack) ->
-		stepsBack = stepsBack || 1
-		if stepsBack > 2
-			throw new Error('Router history: Router only holds the two most recent entries of history.')
-		@_history[stepsBack - 1]
