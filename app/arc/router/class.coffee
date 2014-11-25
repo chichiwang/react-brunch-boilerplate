@@ -6,6 +6,7 @@ DirectorRouter = window.Router
 StateMachine = window.StateMachine
 clone = require('util/helpers').clone
 type = require('util/helpers').type
+documentReady = require('util/helpers').documentReady
 
 # Module Component dependencies
 try RouterConfig = require 'routes'
@@ -182,10 +183,11 @@ module.exports = class Router
 		directorConfig = _directorConfig options, @FSM
 		@router = new DirectorRouter directorConfig
 		@router.configure({ html5history: options.history })
-		$(document).ready =>
+		documentReady ->
 			# console.log 'Router init'
 			@router.init(options.initial)
 			_directorDefault(@router, options.paths['**'], @FSM) if options.paths['**']
+		, @
 		# console.log 'Router initialize router:', @router
 		@
 
