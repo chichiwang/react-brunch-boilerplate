@@ -1,3 +1,5 @@
+'use strict'
+
 # Module dependencies
 StoreClass = require 'arc/store/class'
 Dispatcher = require 'dispatcher'

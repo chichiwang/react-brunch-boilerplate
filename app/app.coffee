@@ -8,13 +8,13 @@ Root = require 'components/root'
 React.initializeTouchEvents(true)
 
 initialize = ->
-	# _initRouter()
+	_initRouter()
 	SiteEvents.initialize()
 
 	React.initializeTouchEvents(true)
 	React.renderComponent <Root />, document.getElementById('Site-Container') if Root
 
 _initRouter = ->
-	require 'flux/router'
+	require 'arc/router'
 
 initialize()

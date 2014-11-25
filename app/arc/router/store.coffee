@@ -1,13 +1,23 @@
 'use strict'
 
-SET = "SET_STORE:ROUTER:STATE"
-REPLACE = "REPLACE_STORE:ROUTER:STATE"
-StoresClass = require 'flux/stores/class'
+# Module dependencies
+StoreClass = require 'arc/store/class'
+Dispatcher = require 'dispatcher'
+Constant = require './const'
 
-routerStore = routerStore or new StoresClass
-	SET: SET
-	REPLACE: REPLACE
-	defaultValue:
+# Dispatch handlers
+setValue = (v) ->
+	@value = v
+
+# Prep actions callbacks
+actionsCallbacks = {}
+actionsCallbacks[Constant.SET_VALUE] = setValue
+
+# Instantiate store class
+RouterStore = new StoreClass
+	dispatcher: Dispatcher
+	actions: actionsCallbacks
+	initial:
 		routeId: undefined
 		path: undefined
 		prevState: undefined
@@ -15,4 +25,4 @@ routerStore = routerStore or new StoresClass
 		transition: undefined
 		transitioned: true
 
-module.exports = routerStore
+module.exports = RouterStore

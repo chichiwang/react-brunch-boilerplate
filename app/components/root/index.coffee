@@ -16,9 +16,6 @@ Root = React.createClass
 		site: SiteStore
 		# route: Router.store
 
-	componentWillMount: ->
-		console.log 'Root componentWillMount: ', SiteStore.get()
-
 	render: ->
 		console.log 'render', @state
 		<div id="Root">
