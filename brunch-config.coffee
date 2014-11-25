@@ -1,8 +1,4 @@
 exports.config =
-	modules:
-		nameCleaner: (path)->
-			# Default lookup
-			return path.replace /^app\//, ''
 	files:
 		javascripts:
 			joinTo:
