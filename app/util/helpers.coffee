@@ -75,9 +75,6 @@ Helpers =
 		for key, val of obj
 			result[key] = clone val, _copied
 		return result
-	merge: (destination, sources...) ->
-		# TODO: Write a deep extend method
-		console.log 'Helpers.merge: ', destination, sources
 
 type = Helpers.type
 clone = Helpers.clone

@@ -168,10 +168,12 @@ module.exports = class Router
 
 		# Options
 		_validateOptions options
+		# TODO: merge defaults manually
 		options = _.merge @defaults, options
 		transitionsEnabled = options.transitions
 
 		# Set up FSM
+		# TODO: remove router history feature
 		@FSM = _FSM options, @_history
 		# console.log 'Router init:', @FSM
 
