@@ -467,6 +467,8 @@ _dispatchHandler = (payload)->
 		continue if action isnt actionId
 		for callback in callbacks
 			callback.call(@, value) if type(callback) is 'function'
+	if type(@value) isnt 'object'
+		throw new Error 'StoreClass _dispatchHandler: callback for action "' + actionId + '" must leave this.value as an object!'
 	# If @value has changed, update @_history and @_value and emit the changes
 	diff = _diffObjects @value, @_value
 	if diff.length > 0
