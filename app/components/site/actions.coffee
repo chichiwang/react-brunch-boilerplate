@@ -1,9 +1,9 @@
 # Module dependencies
 ActionsClass = require 'arc/actions/class'
 Dispatcher = require 'dispatcher'
-Constant = require './const'
+Const = require './const'
 
-# Action handlers
+# Actions methods
 setDimensions = (width, height) ->
 	return {
 		width: width
@@ -12,14 +12,12 @@ setDimensions = (width, height) ->
 setOrientation = (orientation) ->
 	return orientation
 
-# Prep actionsOptions
-actionsOptions = {}
-actionsOptions[Constant.SET_DIMENSIONS] = setDimensions
-actionsOptions[Constant.SET_ORIENTATION] = setOrientation
-
 # Instantiate actions class
 SiteActions = new ActionsClass
 	dispatcher: Dispatcher
-	actions: actionsOptions
+
+# Register actions methods
+SiteActions.register Const.SET_DIMENSIONS, setDimensions
+SiteActions.register Const.SET_ORIENTATION, setOrientation
 
 module.exports = SiteActions

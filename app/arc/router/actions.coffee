@@ -1,19 +1,16 @@
 # Module dependencies
 ActionsClass = require 'arc/actions/class'
 Dispatcher = require 'dispatcher'
-Constant = require './const'
+Const = require './const'
 
-# Action handlers
+# Action methods
 setValue = (v) ->
 	return v
 
-# Prep actionsOptions
-actionsOptions = {}
-actionsOptions[Constant.SET_VALUE] = setValue
-
 # Instantiate actions class
-SiteActions = new ActionsClass
+RouterActions = new ActionsClass
 	dispatcher: Dispatcher
-	actions: actionsOptions
+# Register action methods
+RouterActions.register Const.SET_VALUE, setValue
 
-module.exports = SiteActions
+module.exports = RouterActions

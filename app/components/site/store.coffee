@@ -3,7 +3,7 @@
 # Module dependencies
 StoreClass = require 'arc/store/class'
 Dispatcher = require 'dispatcher'
-Constant = require './const'
+Const = require './const'
 
 # Dispatch handlers
 setDimensions = (val) ->
@@ -12,18 +12,16 @@ setDimensions = (val) ->
 setOrientation = (val) ->
 	@value.orientation = val
 
-# Prep actions callbacks
-actionsCallbacks = {}
-actionsCallbacks[Constant.SET_DIMENSIONS] = setDimensions
-actionsCallbacks[Constant.SET_ORIENTATION] = setOrientation
-
 # Instantiate store class
 SiteStore = new StoreClass
 	dispatcher: Dispatcher
-	actions: actionsCallbacks
 	initial:
 		width: undefined
 		height: undefined
 		orientation: undefined
+
+# Register handlers to store
+SiteStore.registerAction Const.SET_DIMENSIONS, setDimensions
+SiteStore.registerAction Const.SET_ORIENTATION, setOrientation
 
 module.exports = SiteStore

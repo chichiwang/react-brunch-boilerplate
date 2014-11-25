@@ -3,20 +3,15 @@
 # Module dependencies
 StoreClass = require 'arc/store/class'
 Dispatcher = require 'dispatcher'
-Constant = require './const'
+Const = require './const'
 
 # Dispatch handlers
 setValue = (v) ->
 	@value = v
 
-# Prep actions callbacks
-actionsCallbacks = {}
-actionsCallbacks[Constant.SET_VALUE] = setValue
-
 # Instantiate store class
 RouterStore = new StoreClass
 	dispatcher: Dispatcher
-	actions: actionsCallbacks
 	initial:
 		routeId: undefined
 		path: undefined
@@ -24,5 +19,8 @@ RouterStore = new StoreClass
 		curState: undefined
 		transition: undefined
 		transitioned: true
+
+# Register action handlers
+RouterStore.registerAction Const.SET_VALUE, setValue
 
 module.exports = RouterStore
