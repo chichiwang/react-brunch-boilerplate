@@ -1,5 +1,5 @@
 # Module dependencies
-ActionsClass = require 'flux/actions/class'
+ActionsClass = require 'arc/actions/class'
 Dispatcher = require 'dispatcher'
 Constant = require './const'
 

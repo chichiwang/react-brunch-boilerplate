@@ -1,5 +1,5 @@
 # Module dependencies
-StoreClass = require 'flux/store/class'
+StoreClass = require 'arc/store/class'
 Dispatcher = require 'dispatcher'
 Constant = require './const'
 

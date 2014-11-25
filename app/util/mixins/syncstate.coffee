@@ -6,7 +6,7 @@
 # Mixin Dependencies:
 # Arc Stores, Arc Helpers
 # Note: Change the require path to access the global framework object when modularizing
-try StoreClass = require 'flux/store/class'
+try StoreClass = require 'arc/store/class'
 catch
 	throw new Error '[mixin] Sync State: Build must contain Arc Store to use this mixin!'
 try type = require('util/helpers').type
