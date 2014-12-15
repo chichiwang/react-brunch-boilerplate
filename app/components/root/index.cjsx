@@ -6,7 +6,6 @@ SiteStore = require 'components/site/store'
 
 # Helpers and utilities
 Router = require 'arc/router'
-Dispatcher = require 'dispatcher'
 SyncState = require 'util/mixins/syncstate'
 
 Root = React.createClass
