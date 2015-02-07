@@ -7,7 +7,7 @@
   "dependencies": {
     "console-polyfill": "~0.1.0",
     "normalize-css": "~2.1.2",
-    "react": "~0.11.1",
+    "react": "*",
     "director": "git://github.com/ryancbarry/director.git#feature/hashbang",
     "javascript-state-machine": "~2.3.0"
   }

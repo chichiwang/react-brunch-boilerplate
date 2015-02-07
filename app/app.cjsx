@@ -13,6 +13,6 @@ initialize = ->
 
 	Root = require 'components/root'
 	React.initializeTouchEvents(true)
-	React.renderComponent <Root />, document.getElementById('Site-Container') if Root
+	React.render <Root />, document.getElementById('Site-Container') if Root
 
 initialize()

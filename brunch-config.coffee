@@ -1,4 +1,7 @@
 exports.config =
+	plugins:
+		react:
+			autoIncludeCommentBlock: yes
 	files:
 		javascripts:
 			joinTo:
