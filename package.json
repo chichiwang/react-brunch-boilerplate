@@ -1,6 +1,6 @@
 {
   "name": "brunch-react-boilerplate",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A boilerplate for React with Brunch",
   "main": "app.js",
   "scripts": {
@@ -12,14 +12,14 @@
     "Chi-chi Wang <chichi.wang@ignitioncreative.com>"
   ],
   "dependencies": {
-    "brunch": "^1.7.14",
-    "traceur-brunch": "^1.7.3",
-    "auto-reload-brunch": "^1.7.3",
+    "brunch": "*",
+    "traceur-brunch": "*",
+    "auto-reload-brunch": "*",
     "cjsx-brunch": "*",
-    "css-brunch": "^1.7.0",
-    "stylus-brunch": "^1.8.1",
-    "javascript-brunch": "^1.7.1",
-    "uglify-js-brunch": "^1.7.7"
+    "css-brunch": "*",
+    "stylus-brunch": "*",
+    "javascript-brunch": "*",
+    "uglify-js-brunch": "*"
   },
   "devDependencies": {}
 }
