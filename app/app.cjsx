@@ -2,17 +2,15 @@
 'use strict'
 
 SiteEvents = require 'components/site'
-Router = require 'arc/router'
 
 # Initialize React's touch events
 React.initializeTouchEvents(true)
 
 initialize = ->
-	Router.initialize()
 	SiteEvents.initialize()
 
-	Root = require 'components/root'
 	React.initializeTouchEvents(true)
-	React.render <Root />, document.getElementById('Site-Container') if Root
+	require 'components/root'
+	# React.render <Root />, document.getElementById('Site-Container') if Root
 
 initialize()
