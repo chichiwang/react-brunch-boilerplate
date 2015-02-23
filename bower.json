@@ -8,7 +8,6 @@
     "console-polyfill": "~0.1.0",
     "normalize-css": "~2.1.2",
     "react": "*",
-    "director": "git://github.com/ryancbarry/director.git#feature/hashbang",
     "javascript-state-machine": "~2.3.0",
     "react-router": "~0.11.6"
   }
