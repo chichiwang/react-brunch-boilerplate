@@ -10,5 +10,10 @@
     "react": "*",
     "javascript-state-machine": "~2.3.0",
     "react-router": "~0.11.6"
+  },
+  "overrides": {
+    "react": {
+      "main": "react-with-addons.js"
+    }
   }
 }
