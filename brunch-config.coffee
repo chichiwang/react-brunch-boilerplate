@@ -9,7 +9,7 @@ exports.config =
 				'javascripts/vendor.js': /^(?!app)/
 			order:
 				before: [
-					'bower_components/react/react-with-addons.js'
+					'bower_components/react/react-with-addons.min.js'
 				]
 		stylesheets:
 			joinTo: 'stylesheets/app.css'

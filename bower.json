@@ -13,7 +13,7 @@
   },
   "overrides": {
     "react": {
-      "main": "react-with-addons.js"
+      "main": "react-with-addons.min.js"
     }
   }
 }
